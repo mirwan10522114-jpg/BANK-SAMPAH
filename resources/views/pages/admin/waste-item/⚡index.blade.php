@@ -76,12 +76,11 @@ new #[Title('Barang Sampah')] class extends Component {
     public function headers(): array
     {
         return [
-            ['key' => 'code', 'label' => __('Kode'), 'class' => 'w-24'],
-            ['key' => 'name', 'label' => __('Nama')],
-            ['key' => 'category_label', 'label' => __('Kategori'), 'class' => 'hidden md:table-cell'],
-            ['key' => 'unit', 'label' => __('Satuan'), 'class' => 'hidden md:table-cell'],
-            ['key' => 'price_label', 'label' => __('Harga Aktif'), 'sortable' => false],
-            ['key' => 'status_label', 'label' => __('Status'), 'sortable' => false],
+            ['key' => 'name', 'label' => __('Informasi Barang'), 'class' => 'w-80'],
+            ['key' => 'category_label', 'label' => __('Kategori'), 'class' => 'hidden md:table-cell w-40'],
+            ['key' => 'unit', 'label' => __('Satuan'), 'class' => 'hidden md:table-cell w-28'],
+            ['key' => 'price_label', 'label' => __('Harga Aktif'), 'class' => 'w-40', 'sortable' => false],
+            ['key' => 'status_label', 'label' => __('Status'), 'class' => 'w-32 text-center', 'sortable' => false],
         ];
     }
 
@@ -270,7 +269,7 @@ new #[Title('Barang Sampah')] class extends Component {
     }
 }; ?>
 
-<section class="w-full">
+<section class="w-full space-y-4">
     <x-mary-header
         title="{{ __('Barang Sampah') }}"
         subtitle="{{ __('Master barang + riwayat harga. Ubah harga via tombol Set Harga agar riwayat tercatat.') }}"
@@ -284,7 +283,7 @@ new #[Title('Barang Sampah')] class extends Component {
                     icon="o-magnifying-glass"
                     placeholder="{{ __('Cari barang / kode...') }}"
                     clearable
-                    class="md:w-60"
+                    class="input-md bg-base-100 shadow-sm border-base-300 focus:border-primary md:w-60"
                 />
                 <x-mary-select
                     wire:model.live="category_filter"
@@ -293,14 +292,14 @@ new #[Title('Barang Sampah')] class extends Component {
                     option-value="id"
                     placeholder="{{ __('Semua kategori') }}"
                     icon="o-tag"
-                    class="md:w-56"
+                    class="bg-base-100 shadow-sm border-base-300 md:w-56"
                 />
             </div>
         </x-slot:middle>
         <x-slot:actions>
             <x-mary-button
                 icon="o-plus"
-                class="btn-primary"
+                class="btn-primary shadow-sm font-semibold text-sm"
                 wire:click="startCreating"
                 label="{{ __('Tambah Barang') }}"
                 data-test="item-create-button"
@@ -308,91 +307,127 @@ new #[Title('Barang Sampah')] class extends Component {
         </x-slot:actions>
     </x-mary-header>
 
-    <x-mary-table
-        :headers="$this->headers"
-        :rows="$this->items"
-        with-pagination
-        striped
-    >
-        @scope('cell_code', $row)
-            <span class="font-mono text-sm">{{ $row->code }}</span>
-        @endscope
+    <div class="overflow-hidden rounded-xl border border-base-200 bg-base-100 shadow-sm">
+        <x-mary-table
+            :headers="$this->headers"
+            :rows="$this->items"
+            with-pagination
+            per-page="perPage"
+            class="table-sm"
+        >
+            {{-- Kolom Informasi Barang --}}
+            @scope('cell_name', $row)
+                <div class="flex flex-col gap-1 py-2">
+                    <span class="font-semibold text-[15px] leading-tight tracking-tight text-base-content hover:text-primary transition-colors cursor-pointer">
+                        {{ $row->name }}
+                    </span>
+                    <span class="text-xs font-mono font-bold tracking-widest text-primary bg-primary/10 px-2 py-0.5 rounded-md border border-primary/20 w-fit">
+                        {{ $row->code }}
+                    </span>
+                    @if ($row->description)
+                        <span class="text-xs text-base-content/45 font-normal leading-relaxed max-w-[260px] truncate" title="{{ $row->description }}">
+                            {{ $row->description }}
+                        </span>
+                    @endif
+                </div>
+            @endscope
 
-        @scope('cell_name', $row)
-            <div>
-                <div class="font-medium">{{ $row->name }}</div>
-                @if ($row->description)
-                    <div class="text-xs text-base-content/60 line-clamp-1">{{ $row->description }}</div>
+            {{-- Kolom Kategori --}}
+            @scope('cell_category_label', $row)
+                <div class="flex items-center gap-2">
+                    <div class="w-7 h-7 rounded-lg bg-primary/10 flex items-center justify-center text-primary flex-shrink-0">
+                        <x-mary-icon name="o-folder" class="w-4 h-4" />
+                    </div>
+                    <span class="text-sm font-medium text-base-content/80">{{ $row->category?->name ?? '—' }}</span>
+                </div>
+            @endscope
+
+            {{-- Kolom Satuan --}}
+            @scope('cell_unit', $row)
+                <span class="text-sm font-semibold text-base-content/70 bg-base-200/60 px-3 py-1 rounded-lg border border-base-300/40">
+                    {{ $row->unit }}
+                </span>
+            @endscope
+
+            {{-- Kolom Harga --}}
+            @scope('cell_price_label', $row)
+                @if ((float) $row->price_per_unit > 0)
+                    <div class="flex flex-col items-start gap-0">
+                        <span class="font-bold text-xl leading-none text-base-content/90">
+                            Rp {{ number_format((float) $row->price_per_unit, 0, ',', '.') }}
+                        </span>
+                        <span class="text-[10px] text-base-content/45 font-semibold uppercase tracking-widest mt-0.5">
+                            per {{ $row->unit }}
+                        </span>
+                    </div>
+                @else
+                    <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-warning/10 text-warning border border-warning/20">
+                        <span class="w-1.5 h-1.5 rounded-full bg-warning inline-block"></span>
+                        {{ __('Belum di-set') }}
+                    </span>
                 @endif
-            </div>
-        @endscope
+            @endscope
 
-        @scope('cell_category_label', $row)
-            <x-mary-badge value="{{ $row->category?->name }}" class="badge-neutral badge-soft" />
-        @endscope
+            {{-- Kolom Status --}}
+            @scope('cell_status_label', $row)
+                <div class="text-center">
+                    @if ($row->is_active)
+                        <span class="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold bg-success/10 text-success border border-success/20">
+                            <span class="w-1.5 h-1.5 rounded-full bg-success inline-block"></span>
+                            {{ __('Aktif') }}
+                        </span>
+                    @else
+                        <span class="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold bg-base-200 text-base-content/50 border border-base-300/40">
+                            <span class="w-1.5 h-1.5 rounded-full bg-base-content/30 inline-block"></span>
+                            {{ __('Non-aktif') }}
+                        </span>
+                    @endif
+                </div>
+            @endscope
 
-        @scope('cell_price_label', $row)
-            @if ((float) $row->price_per_unit > 0)
-                <span class="font-semibold">Rp {{ number_format((float) $row->price_per_unit, 2, ',', '.') }}</span>
-                <span class="text-xs text-base-content/60">/{{ $row->unit }}</span>
-            @else
-                <x-mary-badge value="{{ __('Belum di-set') }}" class="badge-warning badge-soft" />
-            @endif
-        @endscope
+            {{-- Kolom Actions --}}
+            @scope('actions', $row)
+                <div class="flex items-center gap-0.5 justify-end">
+                    <x-mary-button
+                        icon="o-banknotes"
+                        wire:click="startSettingPrice({{ $row->id }})"
+                        class="btn-ghost btn-sm text-success hover:bg-success/10 rounded-lg"
+                        tooltip="{{ __('Set Harga') }}"
+                        data-test="item-set-price-{{ $row->id }}"
+                    />
+                    <x-mary-button
+                        icon="o-clock"
+                        wire:click="showHistory({{ $row->id }})"
+                        class="btn-ghost btn-sm text-base-content/50 hover:text-info hover:bg-info/10 rounded-lg"
+                        tooltip="{{ __('Riwayat harga') }}"
+                    />
+                    <x-mary-button
+                        icon="o-pencil-square"
+                        wire:click="startEditing({{ $row->id }})"
+                        class="btn-ghost btn-sm text-base-content/70 hover:text-primary hover:bg-primary/10 rounded-lg"
+                        data-test="item-edit-{{ $row->id }}"
+                    />
+                    <x-mary-button
+                        icon="o-trash"
+                        wire:click="confirmDelete({{ $row->id }})"
+                        class="btn-ghost btn-sm text-base-content/40 hover:text-error hover:bg-error/10 rounded-lg"
+                        data-test="item-delete-{{ $row->id }}"
+                    />
+                </div>
+            @endscope
+        </x-mary-table>
+    </div>
 
-        @scope('cell_status_label', $row)
-            @if ($row->is_active)
-                <x-mary-badge value="{{ __('Aktif') }}" class="badge-success badge-soft" />
-            @else
-                <x-mary-badge value="{{ __('Non-aktif') }}" class="badge-ghost" />
-            @endif
-        @endscope
-
-        @scope('actions', $row)
-            <div class="flex items-center gap-1">
-                <x-mary-button
-                    icon="o-banknotes"
-                    wire:click="startSettingPrice({{ $row->id }})"
-                    class="btn-ghost btn-sm text-success"
-                    tooltip="{{ __('Set Harga') }}"
-                    aria-label="{{ __('Set harga untuk').' '.$row->name }}"
-                    data-test="item-set-price-{{ $row->id }}"
-                />
-                <x-mary-button
-                    icon="o-clock"
-                    wire:click="showHistory({{ $row->id }})"
-                    class="btn-ghost btn-sm"
-                    tooltip="{{ __('Riwayat harga') }}"
-                    aria-label="{{ __('Riwayat harga').' '.$row->name }}"
-                />
-                <x-mary-button
-                    icon="o-pencil-square"
-                    wire:click="startEditing({{ $row->id }})"
-                    class="btn-ghost btn-sm"
-                    tooltip="{{ __('Edit barang') }}"
-                    aria-label="{{ __('Edit').' '.$row->name }}"
-                    data-test="item-edit-{{ $row->id }}"
-                />
-                <x-mary-button
-                    icon="o-trash"
-                    wire:click="confirmDelete({{ $row->id }})"
-                    class="btn-ghost btn-sm text-error"
-                    tooltip-left="{{ __('Hapus barang') }}"
-                    aria-label="{{ __('Hapus').' '.$row->name }}"
-                    data-test="item-delete-{{ $row->id }}"
-                />
-            </div>
-        @endscope
-    </x-mary-table>
-
+    {{-- Modal Tambah/Edit Barang --}}
     <x-mary-modal
         wire:model="formModal"
-        title="{{ $editingId ? __('Edit Barang') : __('Tambah Barang') }}"
+        title="{{ $editingId ? __('Edit Barang') : __('Tambah Barang Baru') }}"
         subtitle="{{ $editingId ? __('Ubah metadata barang. Harga diatur lewat tombol Set Harga.') : __('Isi kategori, kode unik & harga awal. Riwayat harga tercatat otomatis.') }}"
         separator
-        box-class="max-w-xl"
+        box-class="max-w-xl rounded-2xl"
     >
-        <x-mary-form wire:submit="save" no-separator>
+        <x-mary-form wire:submit="save" no-separator class="space-y-5">
+
             <x-mary-select
                 wire:model="waste_category_id"
                 label="{{ __('Kategori') }}"
@@ -401,48 +436,77 @@ new #[Title('Barang Sampah')] class extends Component {
                 option-value="id"
                 placeholder="{{ __('Pilih kategori') }}"
                 icon="o-tag"
+                class="select-bordered"
                 required
             />
 
-            <div class="grid gap-3 md:grid-cols-4">
+            <div class="grid gap-4 md:grid-cols-4">
                 <x-mary-input
                     wire:model="code"
                     label="{{ __('Kode') }}"
                     icon="o-hashtag"
                     placeholder="KT1"
                     maxlength="16"
-                    class="uppercase font-mono"
+                    class="uppercase font-mono font-bold input-bordered tracking-widest"
                     required
                 />
                 <div class="md:col-span-3">
-                    <x-mary-input wire:model="name" label="{{ __('Nama barang') }}" placeholder="Dus / PET Botol Bersih / ..." required />
+                    <x-mary-input
+                        wire:model="name"
+                        label="{{ __('Nama Barang') }}"
+                        placeholder="Contoh: Dus / PET Botol Bersih"
+                        class="input-bordered font-medium"
+                        required
+                    />
                 </div>
             </div>
 
-            <div class="grid gap-3 md:grid-cols-2">
-                <x-mary-input wire:model="unit" label="{{ __('Satuan') }}" icon="o-scale" placeholder="kg" required />
+            <div class="grid gap-4 md:grid-cols-2">
+                <x-mary-input
+                    wire:model="unit"
+                    label="{{ __('Satuan') }}"
+                    icon="o-scale"
+                    placeholder="kg"
+                    class="input-bordered"
+                    required
+                />
                 @if (! $editingId)
                     <x-mary-input
                         wire:model="price_per_unit"
-                        label="{{ __('Harga awal (Rp)') }}"
+                        label="{{ __('Harga Awal (Rp)') }}"
                         icon="o-banknotes"
                         type="number"
                         step="0.01"
                         min="0"
+                        class="input-bordered"
                         required
                     />
                 @endif
             </div>
 
-            <x-mary-textarea wire:model="description" label="{{ __('Deskripsi (opsional)') }}" rows="2" />
-            <x-mary-toggle wire:model="is_active" label="{{ __('Aktif') }}" right />
+            <x-mary-textarea
+                wire:model="description"
+                label="{{ __('Deskripsi (Opsional)') }}"
+                placeholder="Tuliskan spesifikasi barang ini..."
+                rows="2"
+                class="textarea-bordered text-sm leading-relaxed"
+            />
+
+            <div class="flex items-center justify-between p-4 rounded-xl border border-base-200 bg-base-200/30">
+                <div class="flex flex-col gap-1">
+                    <span class="text-sm font-semibold tracking-tight text-base-content">{{ __('Status Aktif Barang') }}</span>
+                    <span class="text-xs text-base-content/55 leading-relaxed">{{ __('Barang non-aktif tidak bisa dipilih saat transaksi.') }}</span>
+                </div>
+                <x-mary-toggle wire:model="is_active" class="toggle-success" right />
+            </div>
 
             <x-slot:actions>
-                <x-mary-button label="{{ __('Batal') }}" @click="$wire.formModal = false" />
+                <x-mary-button label="{{ __('Batalkan') }}" @click="$wire.formModal = false" class="btn-ghost text-sm font-medium" />
                 <x-mary-button
-                    label="{{ __('Simpan') }}"
-                    class="btn-primary"
+                    label="{{ __('Simpan Barang') }}"
+                    class="btn-primary font-semibold shadow-sm px-5 text-sm"
                     type="submit"
+                    icon="o-check"
                     spinner="save"
                     data-test="item-save-button"
                 />
@@ -450,43 +514,48 @@ new #[Title('Barang Sampah')] class extends Component {
         </x-mary-form>
     </x-mary-modal>
 
+    {{-- Modal Set Harga --}}
     <x-mary-modal
         wire:model="priceModal"
         title="{{ __('Set Harga Baru') }}"
         subtitle="{{ $this->priceItem?->code }} — {{ $this->priceItem?->name }}"
         separator
-        box-class="max-w-lg"
+        box-class="max-w-lg rounded-2xl"
     >
-        <x-mary-form wire:submit="savePrice" no-separator>
+        <x-mary-form wire:submit="savePrice" no-separator class="space-y-5">
             <x-mary-input
                 wire:model="price_new"
-                label="{{ __('Harga per satuan (Rp)') }}"
+                label="{{ __('Harga per Satuan (Rp)') }}"
                 icon="o-banknotes"
                 type="number"
                 step="0.01"
                 min="0"
+                class="input-bordered"
                 required
             />
             <x-mary-input
                 wire:model="price_effective_from"
-                label="{{ __('Berlaku sejak') }}"
+                label="{{ __('Berlaku Sejak') }}"
                 icon="o-calendar"
                 type="date"
+                class="input-bordered"
                 required
             />
             <x-mary-textarea
                 wire:model="price_notes"
-                label="{{ __('Catatan (opsional)') }}"
+                label="{{ __('Catatan (Opsional)') }}"
                 placeholder="{{ __('Alasan perubahan harga...') }}"
                 rows="2"
+                class="textarea-bordered text-sm"
             />
 
             <x-slot:actions>
-                <x-mary-button label="{{ __('Batal') }}" @click="$wire.priceModal = false" />
+                <x-mary-button label="{{ __('Batalkan') }}" @click="$wire.priceModal = false" class="btn-ghost text-sm font-medium" />
                 <x-mary-button
                     label="{{ __('Simpan Harga') }}"
-                    class="btn-primary"
+                    class="btn-primary font-semibold shadow-sm px-5 text-sm"
                     type="submit"
+                    icon="o-check"
                     spinner="savePrice"
                     data-test="price-save-button"
                 />
@@ -494,16 +563,19 @@ new #[Title('Barang Sampah')] class extends Component {
         </x-mary-form>
     </x-mary-modal>
 
-    <x-mary-modal wire:model="deleteModal" title="{{ __('Hapus Barang') }}" box-class="max-w-md">
-        <p class="text-sm text-base-content/70">
-            {{ __('Hanya bisa dihapus jika barang belum pernah dipakai transaksi. Jika sudah, set status Non-aktif saja.') }}
-        </p>
+    {{-- Modal Hapus --}}
+    <x-mary-modal wire:model="deleteModal" title="{{ __('Konfirmasi Hapus Barang') }}" box-class="max-w-md rounded-2xl">
+        <div class="flex flex-col gap-3 py-2">
+            <p class="text-sm text-base-content/65 leading-relaxed">
+                {{ __('Barang hanya bisa dihapus jika belum pernah dipakai dalam transaksi. Jika sudah dipakai, ubah status menjadi Non-aktif saja.') }}
+            </p>
+        </div>
 
         <x-slot:actions>
-            <x-mary-button label="{{ __('Batal') }}" @click="$wire.deleteModal = false" />
+            <x-mary-button label="{{ __('Batal') }}" @click="$wire.deleteModal = false" class="btn-ghost text-sm font-medium" />
             <x-mary-button
-                label="{{ __('Hapus') }}"
-                class="btn-error"
+                label="{{ __('Ya, Hapus') }}"
+                class="btn-error font-semibold text-sm px-4"
                 wire:click="delete"
                 spinner
                 data-test="item-confirm-delete"
@@ -511,33 +583,40 @@ new #[Title('Barang Sampah')] class extends Component {
         </x-slot:actions>
     </x-mary-modal>
 
+    {{-- Modal Riwayat Harga --}}
     <x-mary-modal
         wire:model="historyModal"
         title="{{ __('Riwayat Harga') }}"
         subtitle="{{ $this->historyItem?->code }} — {{ $this->historyItem?->name }}"
         separator
-        box-class="max-w-xl"
+        box-class="max-w-xl rounded-2xl"
     >
         @if ($this->historyItem)
-            <div class="max-h-[60vh] overflow-y-auto">
-                <table class="table table-zebra">
-                    <thead>
+            <div class="max-h-[60vh] overflow-y-auto rounded-xl border border-base-200">
+                <table class="table table-sm w-full">
+                    <thead class="bg-base-200/50">
                         <tr>
-                            <th>{{ __('Berlaku') }}</th>
-                            <th>{{ __('Harga') }}</th>
-                            <th>{{ __('Catatan') }}</th>
+                            <th class="text-xs font-semibold text-base-content/60 uppercase tracking-wider">{{ __('Berlaku Sejak') }}</th>
+                            <th class="text-xs font-semibold text-base-content/60 uppercase tracking-wider">{{ __('Harga') }}</th>
+                            <th class="text-xs font-semibold text-base-content/60 uppercase tracking-wider">{{ __('Catatan') }}</th>
                         </tr>
                     </thead>
                     <tbody>
                         @forelse ($this->historyItem->prices as $price)
-                            <tr wire:key="price-{{ $price->id }}">
-                                <td class="whitespace-nowrap">{{ $price->effective_from->format('d M Y') }}</td>
-                                <td class="whitespace-nowrap">Rp {{ number_format((float) $price->price_per_unit, 2, ',', '.') }}</td>
-                                <td class="text-sm text-base-content/70">{{ $price->notes ?? '—' }}</td>
+                            <tr wire:key="price-{{ $price->id }}" class="hover:bg-base-200/30 transition-colors">
+                                <td class="whitespace-nowrap text-sm font-medium text-base-content/80">
+                                    {{ $price->effective_from->format('d M Y') }}
+                                </td>
+                                <td class="whitespace-nowrap">
+                                    <span class="font-bold text-sm text-base-content/90">
+                                        Rp {{ number_format((float) $price->price_per_unit, 0, ',', '.') }}
+                                    </span>
+                                </td>
+                                <td class="text-xs text-base-content/55 leading-relaxed">{{ $price->notes ?? '—' }}</td>
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="3" class="text-center text-base-content/60">
+                                <td colspan="3" class="text-center py-8 text-base-content/40 text-sm">
                                     {{ __('Belum ada riwayat harga.') }}
                                 </td>
                             </tr>
@@ -548,7 +627,7 @@ new #[Title('Barang Sampah')] class extends Component {
         @endif
 
         <x-slot:actions>
-            <x-mary-button label="{{ __('Tutup') }}" @click="$wire.historyModal = false" />
+            <x-mary-button label="{{ __('Tutup') }}" @click="$wire.historyModal = false" class="btn-ghost text-sm font-medium" />
         </x-slot:actions>
     </x-mary-modal>
 </section>

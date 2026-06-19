@@ -31,22 +31,10 @@ new #[Title('Pencairan') ] class extends Component {
     public bool $formModal = false;
 
     #[Computed]
-    public function headers(): array
-    {
-        return [
-            ['key' => 'id', 'label' => 'ID', 'class' => 'w-16'],
-            ['key' => 'processed_at_label', 'label' => __('Tanggal'), 'class' => 'hidden md:table-cell', 'sortable' => false],
-            ['key' => 'user_name', 'label' => __('Nasabah'), 'sortable' => false],
-            ['key' => 'amount_label', 'label' => __('Jumlah'), 'sortable' => false],
-            ['key' => 'method_label', 'label' => __('Metode'), 'sortable' => false],
-        ];
-    }
-
-    #[Computed]
     public function withdrawals()
     {
         return WithdrawalRequest::query()
-            ->with('user:id,name,email')
+            ->with('user:id,name,email,member_code')
             ->orderByDesc('processed_at')
             ->orderByDesc('id')
             ->paginate(15);
@@ -147,49 +135,92 @@ new #[Title('Pencairan') ] class extends Component {
         </x-slot:actions>
     </x-mary-header>
 
-    <x-mary-table
-        :headers="$this->headers"
-        :rows="$this->withdrawals"
-        with-pagination
-        striped
-    >
-        @scope('cell_processed_at_label', $row)
-            {{ $row->processed_at->format('d M Y H:i') }}
-        @endscope
+    <div class="bg-base-100 rounded-xl shadow-sm border border-base-200 overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="w-full" style="font-family:'Inter',system-ui,sans-serif">
+                <thead class="bg-base-200/50">
+                    <tr>
+                        <th class="px-4 py-3 text-left text-[11px] font-semibold tracking-wider text-base-content/60 uppercase hidden md:table-cell">{{ __('Tanggal') }}</th>
+                        <th class="px-4 py-3 text-left text-[11px] font-semibold tracking-wider text-base-content/60 uppercase w-20">{{ __('Kode') }}</th>
+                        <th class="px-4 py-3 text-left text-[11px] font-semibold tracking-wider text-base-content/60 uppercase">{{ __('Nasabah') }}</th>
+                        <th class="px-4 py-3 text-right text-[11px] font-semibold tracking-wider text-base-content/60 uppercase">{{ __('Jumlah') }}</th>
+                        <th class="px-4 py-3 text-left text-[11px] font-semibold tracking-wider text-base-content/60 uppercase">{{ __('Metode') }}</th>
+                        <th class="px-4 py-3 text-left text-[11px] font-semibold tracking-wider text-base-content/60 uppercase hidden lg:table-cell">{{ __('Detail Rekening') }}</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-base-200/60">
+                    @forelse ($this->withdrawals as $row)
+                        <tr class="hover:bg-base-200/50 transition-colors">
+                            <td class="px-4 py-3 text-sm text-base-content/80 whitespace-nowrap hidden md:table-cell">
+                                {{ $row->processed_at->format('d/m/Y') }}
+                                <div class="text-xs text-base-content/50">{{ $row->processed_at->format('H:i') }}</div>
+                            </td>
 
-        @scope('cell_user_name', $row)
-            <div>
-                <div class="font-medium">{{ $row->user?->name ?? '—' }}</div>
-                <div class="text-xs text-base-content/60">{{ $row->user?->email }}</div>
+                            <td class="px-4 py-3 text-xs font-mono font-semibold text-base-content/50">
+                                {{ $row->user?->member_code ?? '—' }}
+                            </td>
+
+                            <td class="px-4 py-3">
+                                <div class="text-sm font-medium text-base-content">{{ $row->user?->name ?? '—' }}</div>
+                                <div class="text-xs text-base-content/50">{{ $row->user?->email }}</div>
+                            </td>
+
+                            <td class="px-4 py-3 text-right">
+                                <span class="text-sm font-semibold text-base-content">
+                                    Rp {{ number_format((float) $row->amount, 0, ',', '.') }}
+                                </span>
+                            </td>
+
+                            <td class="px-4 py-3">
+                                @if ($row->method === 'transfer')
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-info/10 text-info">
+                                        {{ __('Transfer') }}
+                                    </span>
+                                @else
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-success/10 text-success">
+                                        {{ __('Cash') }}
+                                    </span>
+                                @endif
+                            </td>
+
+                            <td class="px-4 py-3 hidden lg:table-cell">
+                                @if ($row->method === 'transfer' && $row->bank_name)
+                                    <div class="text-sm text-base-content">{{ $row->bank_name }}</div>
+                                    <div class="text-xs text-base-content/50">
+                                        {{ $row->account_number }} @if($row->account_name) — {{ $row->account_name }} @endif
+                                    </div>
+                                @else
+                                    <span class="text-sm text-base-content/40">—</span>
+                                @endif
+                            </td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="6" class="px-4 py-8 text-center text-sm text-base-content/50 italic">
+                                {{ __('Belum ada riwayat pencairan.') }}
+                            </td>
+                        </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
+
+        {{-- Pagination --}}
+        @if($this->withdrawals->hasPages())
+            <div class="px-4 py-4 bg-base-200/50 border-t border-base-200">
+                {{ $this->withdrawals->links() }}
             </div>
-        @endscope
-
-        @scope('cell_amount_label', $row)
-            <span class="font-semibold">Rp {{ number_format((float) $row->amount, 0, ',', '.') }}</span>
-        @endscope
-
-        @scope('cell_method_label', $row)
-            @if ($row->method === 'transfer')
-                <x-mary-badge value="{{ __('Transfer') }}" class="badge-info badge-soft" />
-                @if ($row->bank_name)
-                    <div class="text-xs text-base-content/60 mt-1">
-                        {{ $row->bank_name }} • {{ $row->account_number }}
-                    </div>
-                @endif
-            @else
-                <x-mary-badge value="{{ __('Cash') }}" class="badge-success badge-soft" />
-            @endif
-        @endscope
-    </x-mary-table>
+        @endif
+    </div>
 
     <x-mary-modal
         wire:model="formModal"
         title="{{ __('Pencairan Baru') }}"
         subtitle="{{ __('Hanya nasabah dengan saldo tersedia > 0 yang bisa dipilih.') }}"
         separator
-        box-class="max-w-lg"
+        box-class="max-w-lg rounded-2xl"
     >
-        <x-mary-form wire:submit="save" no-separator>
+        <x-mary-form wire:submit="save" no-separator class="space-y-4">
             <x-mary-select
                 wire:model.live="user_id"
                 label="{{ __('Nasabah') }}"
@@ -199,13 +230,14 @@ new #[Title('Pencairan') ] class extends Component {
                 placeholder="{{ __('Pilih nasabah') }}"
                 icon="o-user"
                 required
+                class="select-bordered"
             />
 
             @if ($this->selectedBalance)
-                <div class="rounded-lg bg-base-200 p-3 text-sm">
-                    {{ __('Saldo tersedia') }}:
-                    <span class="font-semibold">
-                        Rp {{ number_format((float) $this->selectedBalance->saldo_tersedia, 2, ',', '.') }}
+                <div class="rounded-xl border border-base-200 bg-base-200/30 p-3 text-sm flex justify-between items-center">
+                    <span class="text-base-content/60">{{ __('Saldo tersedia') }}</span>
+                    <span class="font-semibold text-success">
+                        Rp {{ number_format((float) $this->selectedBalance->saldo_tersedia, 0, ',', '.') }}
                     </span>
                 </div>
             @endif
@@ -218,6 +250,7 @@ new #[Title('Pencairan') ] class extends Component {
                 min="0"
                 icon="o-banknotes"
                 required
+                class="input-bordered"
             />
 
             <x-mary-select
@@ -230,26 +263,30 @@ new #[Title('Pencairan') ] class extends Component {
                 option-label="name"
                 option-value="id"
                 required
+                class="select-bordered"
             />
 
             @if ($method === 'transfer')
-                <x-mary-input wire:model="bank_name" label="{{ __('Nama bank') }}" required />
-                <x-mary-input wire:model="account_number" label="{{ __('Nomor rekening') }}" required />
-                <x-mary-input wire:model="account_name" label="{{ __('Atas nama') }}" required />
+                <div class="rounded-xl border border-base-200 bg-base-200/20 p-4 space-y-3">
+                    <p class="text-xs font-semibold uppercase tracking-wider text-base-content/50">{{ __('Detail Rekening Tujuan') }}</p>
+                    <x-mary-input wire:model="bank_name" label="{{ __('Nama bank') }}" required class="input-bordered" />
+                    <x-mary-input wire:model="account_number" label="{{ __('Nomor rekening') }}" required class="input-bordered" />
+                    <x-mary-input wire:model="account_name" label="{{ __('Atas nama') }}" required class="input-bordered" />
+                </div>
             @endif
 
-            <x-mary-textarea wire:model="notes" label="{{ __('Catatan') }}" rows="2" />
+            <x-mary-textarea wire:model="notes" label="{{ __('Catatan') }}" rows="2" class="textarea-bordered" />
 
             <x-slot:actions>
-                <x-mary-button label="{{ __('Batal') }}" @click="$wire.formModal = false" />
+                <x-mary-button label="{{ __('Batal') }}" @click="$wire.formModal = false" class="btn-ghost text-sm font-medium" />
                 <x-mary-button
                     type="submit"
                     label="{{ __('Simpan Pencairan') }}"
-                    class="btn-primary"
+                    class="btn-primary font-semibold shadow-sm px-5 text-sm"
                     spinner="save"
                     data-test="withdrawal-save-button"
                 />
             </x-slot:actions>
         </x-mary-form>
     </x-mary-modal>
-</section>
+</section>x

@@ -10,22 +10,10 @@ new #[Title('Pengolahan Sampah')] class extends Component {
     use WithPagination;
 
     #[Computed]
-    public function headers(): array
-    {
-        return [
-            ['key' => 'id', 'label' => 'ID', 'class' => 'w-16'],
-            ['key' => 'transacted_at_label', 'label' => __('Tanggal'), 'class' => 'hidden md:table-cell', 'sortable' => false],
-            ['key' => 'total_input_weight_label', 'label' => __('Total Input'), 'sortable' => false],
-            ['key' => 'outputs_label', 'label' => __('Produk Dihasilkan'), 'class' => 'hidden lg:table-cell', 'sortable' => false],
-            ['key' => 'notes', 'label' => __('Catatan'), 'class' => 'hidden lg:table-cell', 'sortable' => false],
-        ];
-    }
-
-    #[Computed]
     public function transactions()
     {
         return ProcessingTransaction::query()
-            ->with('outputs')
+            ->with(['inputs', 'outputs'])
             ->orderByDesc('transacted_at')
             ->orderByDesc('id')
             ->paginate(15);
@@ -50,41 +38,103 @@ new #[Title('Pengolahan Sampah')] class extends Component {
         </x-slot:actions>
     </x-mary-header>
 
-    <x-mary-table
-        :headers="$this->headers"
-        :rows="$this->transactions"
-        with-pagination
-        striped
-    >
-        @scope('cell_transacted_at_label', $row)
-            {{ $row->transacted_at->format('d M Y H:i') }}
-        @endscope
+    <div class="bg-base-100 rounded-xl shadow-sm border border-base-200 overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="w-full" style="font-family:'Inter',system-ui,sans-serif">
+                <thead class="bg-base-200/50">
+                    <tr>
+                        <th class="px-4 py-3 text-left text-[11px] font-semibold tracking-wider text-base-content/60 uppercase">{{ __('Tanggal') }}</th>
+                        <th class="px-4 py-3 text-left text-[11px] font-semibold tracking-wider text-base-content/60 uppercase">{{ __('Sampah Input') }}</th>
+                        <th class="px-4 py-3 text-left text-[11px] font-semibold tracking-wider text-base-content/60 uppercase">{{ __('Kategori') }}</th>
+                        <th class="px-4 py-3 text-right text-[11px] font-semibold tracking-wider text-base-content/60 uppercase">{{ __('Berat Input') }}</th>
+                        <th class="px-4 py-3 text-left text-[11px] font-semibold tracking-wider text-base-content/60 uppercase">{{ __('Produk Dihasilkan') }}</th>
+                        <th class="px-4 py-3 text-right text-[11px] font-semibold tracking-wider text-base-content/60 uppercase">{{ __('Jumlah Output') }}</th>
+                        <th class="px-4 py-3 text-left text-[11px] font-semibold tracking-wider text-base-content/60 uppercase hidden lg:table-cell">{{ __('Catatan') }}</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-base-200/60">
+                    @forelse ($this->transactions as $trx)
+                        @php
+                            $inputs = $trx->inputs;
+                            $outputs = $trx->outputs;
+                            $maxRows = max($inputs->count(), $outputs->count(), 1);
+                        @endphp
 
-        @scope('cell_total_input_weight_label', $row)
-            <span class="font-semibold">
-                {{ rtrim(rtrim(number_format((float) $row->total_input_weight, 3, ',', '.'), '0'), ',') }}
-            </span>
-            <span class="text-xs text-base-content/60">kg</span>
-        @endscope
+                        @for ($i = 0; $i < $maxRows; $i++)
+                            @php
+                                $input = $inputs->get($i);
+                                $output = $outputs->get($i);
+                            @endphp
+                            <tr class="hover:bg-base-200/50 transition-colors">
+                                {{-- Tanggal --}}
+                                <td class="px-4 py-3 text-sm text-base-content/80 whitespace-nowrap">
+                                    {{ $trx->transacted_at->format('d/m/Y') }}
+                                    <div class="text-xs text-base-content/50">{{ $trx->transacted_at->format('H:i') }}</div>
+                                </td>
 
-        @scope('cell_outputs_label', $row)
-            @if ($row->outputs->isEmpty())
-                <span class="text-base-content/50 text-sm">{{ __('(tanpa produk)') }}</span>
-            @else
-                @foreach ($row->outputs as $output)
-                    <div class="text-sm">
-                        {{ $output->product_name_snapshot }}:
-                        <span class="font-medium">
-                            {{ rtrim(rtrim(number_format((float) $output->quantity, 3, ',', '.'), '0'), ',') }}
-                        </span>
-                        <span class="text-xs text-base-content/60">{{ $output->unit_snapshot }}</span>
-                    </div>
-                @endforeach
-            @endif
-        @endscope
+                                {{-- Sampah Input --}}
+                                <td class="px-4 py-3 text-sm text-base-content">
+                                    {{ $input?->item_name_snapshot ?? '—' }}
+                                </td>
 
-        @scope('cell_notes', $row)
-            <span class="text-sm text-base-content/70">{{ $row->notes ?? '—' }}</span>
-        @endscope
-    </x-mary-table>
+                                {{-- Kategori --}}
+                                <td class="px-4 py-3">
+                                    @if ($input)
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-base-200 text-base-content/70">
+                                            {{ $input->category_name_snapshot ?? '—' }}
+                                        </span>
+                                    @endif
+                                </td>
+
+                                {{-- Berat Input --}}
+                                <td class="px-4 py-3 text-right">
+                                    @if ($input)
+                                        <span class="text-sm font-semibold text-base-content">
+                                            {{ rtrim(rtrim(number_format((float) $input->quantity, 1, ',', '.'), '0'), ',') }}
+                                        </span>
+                                        <span class="text-xs text-base-content/50">{{ $input->unit_snapshot }}</span>
+                                    @endif
+                                </td>
+
+                                {{-- Produk Dihasilkan --}}
+                                <td class="px-4 py-3 text-sm text-base-content">
+                                    {{ $output?->product_name_snapshot ?? '—' }}
+                                </td>
+
+                                {{-- Jumlah Output --}}
+                                <td class="px-4 py-3 text-right">
+                                    @if ($output)
+                                        <span class="text-sm font-semibold text-primary">
+                                            {{ rtrim(rtrim(number_format((float) $output->quantity, 1, ',', '.'), '0'), ',') }}
+                                        </span>
+                                        <span class="text-xs text-base-content/50">{{ $output->unit_snapshot }}</span>
+                                    @endif
+                                </td>
+
+                                {{-- Catatan --}}
+                                <td class="px-4 py-3 hidden lg:table-cell">
+                                    <div class="max-w-[160px] truncate text-sm text-base-content/70" title="{{ $trx->notes ?? '—' }}">
+                                        {{ $trx->notes ?? '—' }}
+                                    </div>
+                                </td>
+                            </tr>
+                        @endfor
+                    @empty
+                        <tr>
+                            <td colspan="7" class="px-4 py-8 text-center text-sm text-base-content/50 italic">
+                                {{ __('Belum ada riwayat pengolahan.') }}
+                            </td>
+                        </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
+
+        {{-- Pagination --}}
+        @if($this->transactions->hasPages())
+            <div class="px-4 py-4 bg-base-200/50 border-t border-base-200">
+                {{ $this->transactions->links() }}
+            </div>
+        @endif
+    </div>
 </section>

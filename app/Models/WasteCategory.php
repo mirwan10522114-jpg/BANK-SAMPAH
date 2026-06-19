@@ -11,7 +11,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-#[Fillable(['name', 'slug', 'code_prefix', 'description', 'is_active'])]
+#[Fillable(['name', 'slug', 'code_prefix', 'description', 'is_active', 'image'])]
 class WasteCategory extends Model
 {
     /** @use HasFactory<WasteCategoryFactory> */
@@ -33,4 +33,4 @@ class WasteCategory extends Model
     {
         return $query->where('is_active', true);
     }
-}
+}   

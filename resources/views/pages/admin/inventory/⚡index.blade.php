@@ -30,19 +30,6 @@ new #[Title('Inventory Sampah')] class extends Component {
     }
 
     #[Computed]
-    public function headers(): array
-    {
-        return [
-            ['key' => 'code', 'label' => __('Kode'), 'class' => 'w-20'],
-            ['key' => 'name', 'label' => __('Barang')],
-            ['key' => 'category_label', 'label' => __('Kategori'), 'class' => 'hidden md:table-cell'],
-            ['key' => 'unit', 'label' => __('Satuan'), 'class' => 'hidden md:table-cell'],
-            ['key' => 'stock_label', 'label' => __('Stok'), 'sortable' => false],
-            ['key' => 'status_label', 'label' => __('Status'), 'class' => 'hidden lg:table-cell', 'sortable' => false],
-        ];
-    }
-
-    #[Computed]
     public function rows()
     {
         $stocks = Inventory::query()
@@ -150,43 +137,67 @@ new #[Title('Inventory Sampah')] class extends Component {
         </button>
     </div>
 
-    <x-mary-table
-        :headers="$this->headers"
-        :rows="$this->rows"
-        striped
-    >
-        @scope('cell_code', $row)
-            <span class="font-mono text-sm">{{ $row->code }}</span>
-        @endscope
+    <div class="bg-base-100 rounded-xl shadow-sm border border-base-200 overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="w-full" style="font-family:'Inter',system-ui,sans-serif">
+                <thead class="bg-base-200/50">
+                    <tr>
+                        <th class="px-4 py-3 text-left text-[11px] font-semibold tracking-wider text-base-content/60 uppercase w-20">{{ __('Kode') }}</th>
+                        <th class="px-4 py-3 text-left text-[11px] font-semibold tracking-wider text-base-content/60 uppercase">{{ __('Barang') }}</th>
+                        <th class="px-4 py-3 text-left text-[11px] font-semibold tracking-wider text-base-content/60 uppercase hidden md:table-cell">{{ __('Kategori') }}</th>
+                        <th class="px-4 py-3 text-left text-[11px] font-semibold tracking-wider text-base-content/60 uppercase hidden md:table-cell">{{ __('Satuan') }}</th>
+                        <th class="px-4 py-3 text-right text-[11px] font-semibold tracking-wider text-base-content/60 uppercase">{{ __('Stok') }}</th>
+                        <th class="px-4 py-3 text-left text-[11px] font-semibold tracking-wider text-base-content/60 uppercase hidden lg:table-cell">{{ __('Status') }}</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-base-200/60">
+                    @forelse ($this->rows as $row)
+                        @php $stock = (float) $row->stock; @endphp
+                        <tr class="hover:bg-base-200/50 transition-colors">
+                            <td class="px-4 py-3 text-sm font-mono text-base-content/70">{{ $row->code }}</td>
 
-        @scope('cell_name', $row)
-            <div class="font-medium">{{ $row->name }}</div>
-        @endscope
+                            <td class="px-4 py-3 text-sm font-medium text-base-content">{{ $row->name }}</td>
 
-        @scope('cell_category_label', $row)
-            <x-mary-badge value="{{ $row->category?->name }}" class="badge-neutral badge-soft" />
-        @endscope
+                            <td class="px-4 py-3 hidden md:table-cell">
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-base-200 text-base-content/70">
+                                    {{ $row->category?->name ?? '—' }}
+                                </span>
+                            </td>
 
-        @scope('cell_stock_label', $row)
-            @php $stock = (float) $row->stock; @endphp
-            <span @class([
-                'font-semibold',
-                'text-success' => $stock > 0,
-                'text-base-content/40' => $stock <= 0,
-            ])>
-                {{ rtrim(rtrim(number_format($stock, 3, ',', '.'), '0'), ',') }}
-                <span class="text-xs text-base-content/60">{{ $row->unit }}</span>
-            </span>
-        @endscope
+                            <td class="px-4 py-3 text-sm text-base-content/70 hidden md:table-cell">{{ $row->unit }}</td>
 
-        @scope('cell_status_label', $row)
-            @if (! $row->is_active)
-                <x-mary-badge value="{{ __('Non-aktif') }}" class="badge-ghost" />
-            @elseif ((float) $row->stock > 0)
-                <x-mary-badge value="{{ __('Tersedia') }}" class="badge-success badge-soft" />
-            @else
-                <x-mary-badge value="{{ __('Kosong') }}" class="badge-warning badge-soft" />
-            @endif
-        @endscope
-    </x-mary-table>
+                            <td class="px-4 py-3 text-right">
+                                <span class="text-sm font-semibold {{ $stock > 0 ? 'text-success' : 'text-base-content/40' }}">
+                                    {{ rtrim(rtrim(number_format($stock, 1, ',', '.'), '0'), ',') }}
+                                </span>
+                                <span class="text-xs text-base-content/50">{{ $row->unit }}</span>
+                            </td>
+
+                            <td class="px-4 py-3 hidden lg:table-cell">
+                                @if (! $row->is_active)
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-base-200 text-base-content/50">
+                                        {{ __('Non-aktif') }}
+                                    </span>
+                                @elseif ($stock > 0)
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-success/10 text-success">
+                                        {{ __('Tersedia') }}
+                                    </span>
+                                @else
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-warning/10 text-warning">
+                                        {{ __('Kosong') }}
+                                    </span>
+                                @endif
+                            </td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="6" class="px-4 py-8 text-center text-sm text-base-content/50 italic">
+                                {{ __('Tidak ada data barang.') }}
+                            </td>
+                        </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
+    </div>
 </section>

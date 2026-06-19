@@ -17,22 +17,10 @@ new #[Title('Penjualan')] class extends Component {
     }
 
     #[Computed]
-    public function headers(): array
-    {
-        return [
-            ['key' => 'id', 'label' => 'ID', 'class' => 'w-16'],
-            ['key' => 'transacted_at_label', 'label' => __('Tanggal'), 'class' => 'hidden md:table-cell', 'sortable' => false],
-            ['key' => 'partner_name', 'label' => __('Mitra'), 'sortable' => false],
-            ['key' => 'total_weight_label', 'label' => __('Berat'), 'class' => 'hidden lg:table-cell', 'sortable' => false],
-            ['key' => 'total_value_label', 'label' => __('Total Nilai'), 'sortable' => false],
-        ];
-    }
-
-    #[Computed]
     public function transactions()
     {
         return SalesTransaction::query()
-            ->with('partner:id,name')
+            ->with(['partner:id,name', 'items.item'])
             ->when($this->search !== '', function ($q) {
                 $q->whereHas('partner', fn ($q) => $q->where('name', 'like', '%'.$this->search.'%'));
             })
@@ -68,27 +56,84 @@ new #[Title('Penjualan')] class extends Component {
         </x-slot:actions>
     </x-mary-header>
 
-    <x-mary-table
-        :headers="$this->headers"
-        :rows="$this->transactions"
-        with-pagination
-        striped
-    >
-        @scope('cell_transacted_at_label', $row)
-            {{ $row->transacted_at->format('d M Y H:i') }}
-        @endscope
+    <div class="bg-base-100 rounded-xl shadow-sm border border-base-200 overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="w-full" style="font-family:'Inter',system-ui,sans-serif">
+                <thead class="bg-base-200/50">
+                    <tr>
+                        <th class="px-4 py-3 text-left text-[11px] font-semibold tracking-wider text-base-content/60 uppercase">{{ __('Tanggal') }}</th>
+                        <th class="px-4 py-3 text-left text-[11px] font-semibold tracking-wider text-base-content/60 uppercase">{{ __('Mitra') }}</th>
+                        <th class="px-4 py-3 text-left text-[11px] font-semibold tracking-wider text-base-content/60 uppercase">{{ __('Jenis') }}</th>
+                        <th class="px-4 py-3 text-right text-[11px] font-semibold tracking-wider text-base-content/60 uppercase">{{ __('Berat (Kg)') }}</th>
+                        <th class="px-4 py-3 text-right text-[11px] font-semibold tracking-wider text-base-content/60 uppercase">{{ __('Harga/Kg') }}</th>
+                        <th class="px-4 py-3 text-right text-[11px] font-semibold tracking-wider text-base-content/60 uppercase">{{ __('Subtotal') }}</th>
+                        <th class="px-4 py-3 text-left text-[11px] font-semibold tracking-wider text-base-content/60 uppercase">{{ __('Ket') }}</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-base-200/60">
+                    @forelse ($this->transactions as $trx)
+                        @if($trx->items && $trx->items->count() > 0)
+                            @foreach ($trx->items as $item)
+                                @php
+                                    $itemName = $item->item_name_snapshot ?: ($item->item->name ?? '-');
+                                    $price = $item->price_per_unit ?? 0;
+                                    $subtotal = $item->subtotal ?? ($price * $item->quantity);
+                                    $qtyFormatted = rtrim(rtrim(number_format((float) $item->quantity, 2, ',', '.'), '0'), ',');
+                                @endphp
+                                <tr class="hover:bg-base-200/50 transition-colors">
+                                    <td class="px-4 py-3 text-sm text-base-content/80 whitespace-nowrap">
+                                        {{ $trx->transacted_at->format('d/m/Y') }}
+                                        <div class="text-xs text-base-content/50">{{ $trx->transacted_at->format('H:i') }}</div>
+                                    </td>
 
-        @scope('cell_partner_name', $row)
-            <div class="font-medium">{{ $row->partner?->name ?? '—' }}</div>
-        @endscope
+                                    <td class="px-4 py-3 text-sm font-medium text-base-content">
+                                        {{ $trx->partner?->name ?? '—' }}
+                                    </td>
 
-        @scope('cell_total_weight_label', $row)
-            {{ rtrim(rtrim(number_format((float) $row->total_weight, 3, ',', '.'), '0'), ',') }}
-            <span class="text-xs text-base-content/60">kg</span>
-        @endscope
+                                    <td class="px-4 py-3 text-sm text-base-content/80">{{ $itemName }}</td>
 
-        @scope('cell_total_value_label', $row)
-            <span class="font-semibold">Rp {{ number_format((float) $row->total_value, 0, ',', '.') }}</span>
-        @endscope
-    </x-mary-table>
+                                    <td class="px-4 py-3 text-sm text-right text-base-content/80 tabular-nums">{{ $qtyFormatted }}</td>
+
+                                    <td class="px-4 py-3 text-sm text-right text-base-content/60 tabular-nums">
+                                        Rp{{ number_format((float) $price, 0, ',', '.') }}
+                                    </td>
+
+                                    <td class="px-4 py-3 text-sm text-right font-semibold text-primary tabular-nums">
+                                        Rp{{ number_format((float) $subtotal, 0, ',', '.') }}
+                                    </td>
+
+                                    <td class="px-4 py-3">
+                                        <div class="max-w-[150px] truncate text-xs text-base-content/60" title="{{ $trx->notes ?? '-' }}">
+                                            {{ $trx->notes ?? '-' }}
+                                        </div>
+                                    </td>
+                                </tr>
+                            @endforeach
+                        @else
+                            <tr class="hover:bg-base-200/50 transition-colors">
+                                <td class="px-4 py-3 text-sm text-base-content/80 whitespace-nowrap">{{ $trx->transacted_at->format('d/m/Y') }}</td>
+                                <td class="px-4 py-3 text-sm font-medium text-base-content">{{ $trx->partner?->name ?? '—' }}</td>
+                                <td colspan="5" class="px-4 py-3 text-center text-sm text-base-content/50 italic">
+                                    Tidak ada rincian barang.
+                                </td>
+                            </tr>
+                        @endif
+                    @empty
+                        <tr>
+                            <td colspan="7" class="px-4 py-8 text-center text-sm text-base-content/50 italic">
+                                {{ __('Belum ada riwayat penjualan.') }}
+                            </td>
+                        </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
+
+        {{-- Pagination --}}
+        @if($this->transactions->hasPages())
+            <div class="px-4 py-4 bg-base-200/50 border-t border-base-200">
+                {{ $this->transactions->links() }}
+            </div>
+        @endif
+    </div>
 </section>

@@ -17,31 +17,23 @@ new #[Title('Transaksi Nabung')] class extends Component {
     }
 
     #[Computed]
-    public function headers(): array
-    {
-        return [
-            ['key' => 'id', 'label' => 'ID', 'class' => 'w-16'],
-            ['key' => 'transacted_at_label', 'label' => __('Tanggal'), 'class' => 'hidden md:table-cell', 'sortable' => false],
-            ['key' => 'user_name', 'label' => __('Nasabah'), 'sortable' => false],
-            ['key' => 'total_weight_label', 'label' => __('Berat (kg)'), 'class' => 'hidden lg:table-cell', 'sortable' => false],
-            ['key' => 'total_value_label', 'label' => __('Nilai'), 'sortable' => false],
-            ['key' => 'points_awarded', 'label' => __('Poin'), 'class' => 'hidden lg:table-cell'],
-        ];
-    }
-
-    #[Computed]
     public function transactions()
     {
         return SavingTransaction::query()
-            ->with('user:id,name,email')
+            // Kita cukup meload relasi 'user' dan 'items' saja.
+            // Relasi ke master barang (wasteItem) dipakai sebagai fallback
+            // jika data snapshot kosong, jadi tetap di-eager-load.
+            ->with(['user:id,name,email,member_code', 'items.wasteItem'])
             ->when($this->search !== '', function ($q) {
                 $q->whereHas('user', function ($q) {
                     $like = '%'.$this->search.'%';
-                    $q->where('name', 'like', $like)->orWhere('email', 'like', $like);
+                    $q->where('name', 'like', $like)
+                        ->orWhere('email', 'like', $like)
+                        ->orWhere('member_code', 'like', $like);
                 });
             })
-            ->orderByDesc('transacted_at')
-            ->orderByDesc('id')
+            // Mengurutkan dari transaksi terbaru menggunakan method bawaan Laravel
+            ->latest()
             ->paginate(15);
     }
 }; ?>
@@ -49,7 +41,7 @@ new #[Title('Transaksi Nabung')] class extends Component {
 <section class="w-full">
     <x-mary-header
         title="{{ __('Transaksi Nabung') }}"
-        subtitle="{{ __('Riwayat semua transaksi nabung nasabah.') }}"
+        subtitle="{{ __('Riwayat rincian item transaksi nabung nasabah.') }}"
         separator
         progress-indicator
     >
@@ -57,7 +49,7 @@ new #[Title('Transaksi Nabung')] class extends Component {
             <x-mary-input
                 wire:model.live.debounce.300ms="search"
                 icon="o-magnifying-glass"
-                placeholder="{{ __('Cari nasabah...') }}"
+                placeholder="{{ __('Cari kode, nama, nasabah...') }}"
                 clearable
             />
         </x-slot:middle>
@@ -72,37 +64,91 @@ new #[Title('Transaksi Nabung')] class extends Component {
         </x-slot:actions>
     </x-mary-header>
 
-    <x-mary-table
-        :headers="$this->headers"
-        :rows="$this->transactions"
-        with-pagination
-        striped
-    >
-        @scope('cell_transacted_at_label', $row)
-            {{ $row->transacted_at->format('d M Y H:i') }}
-        @endscope
+    <div class="bg-base-100 rounded-xl shadow-sm border border-base-200 overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="table w-full">
+                <thead class="bg-base-200/50">
+                    <tr>
+                        <th class="font-semibold text-[11px] tracking-wider text-base-content/60 uppercase">{{ __('Tanggal') }}</th>
+                        <th class="font-semibold text-[11px] tracking-wider text-base-content/60 uppercase">{{ __('Kode') }}</th>
+                        <th class="font-semibold text-[11px] tracking-wider text-base-content/60 uppercase">{{ __('Nama') }}</th>
+                        <th class="font-semibold text-[11px] tracking-wider text-base-content/60 uppercase">{{ __('Jenis') }}</th>
+                        <th class="font-semibold text-[11px] tracking-wider text-base-content/60 uppercase text-right">{{ __('Jumlah (Kg)') }}</th>
+                        <th class="font-semibold text-[11px] tracking-wider text-base-content/60 uppercase text-right">{{ __('Harga/Kg') }}</th>
+                        <th class="font-semibold text-[11px] tracking-wider text-base-content/60 uppercase text-right">{{ __('Jumlah (Rp)') }}</th>
+                        <th class="font-semibold text-[11px] tracking-wider text-base-content/60 uppercase">{{ __('Ket') }}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @forelse ($this->transactions as $trx)
+                        @if($trx->items && $trx->items->count() > 0)
+                            @foreach ($trx->items as $item)
+                                @php
+                                    // Prioritaskan data snapshot (tidak berubah walau master data diedit).
+                                    // Fallback ke relasi wasteItem kalau snapshot kosong.
+                                    $itemName = $item->item_name_snapshot ?: ($item->wasteItem->name ?? '-');
+                                    $price = $item->price_per_unit_snapshot ?? 0;
+                                    $subtotal = $item->subtotal ?? ($price * $item->quantity);
+                                    // Bulatkan jumlah (kg) ke maksimal 2 angka di belakang koma, tanpa nol berlebih
+                                    $qtyFormatted = rtrim(rtrim(number_format((float) $item->quantity, 2, ',', '.'), '0'), ',');
+                                @endphp
+                                <tr class="hover:bg-base-200/30 border-b border-base-200/60 last:border-0">
+                                    <td class="text-sm text-base-content/80">{{ $trx->created_at->format('d/m/Y') }}</td>
 
-        @scope('cell_user_name', $row)
-            <div>
-                <div class="font-medium">{{ $row->user->name }}</div>
-                <div class="text-xs text-base-content/60">{{ $row->user->email }}</div>
+                                    <td>
+                                        <span class="text-xs font-mono font-semibold text-base-content/50">
+                                            {{ $trx->user->member_code ?? '—' }}
+                                        </span>
+                                    </td>
+
+                                    <td class="text-sm font-medium text-base-content">{{ strtoupper($trx->user->name) }}</td>
+
+                                    <td class="text-sm text-base-content/80">{{ $itemName }}</td>
+
+                                    <td class="text-sm text-right text-base-content/80 tabular-nums">{{ $qtyFormatted }}</td>
+
+                                    <td class="text-sm text-right text-base-content/60 tabular-nums">Rp{{ number_format((float) $price, 0, ',', '.') }}</td>
+
+                                    <td class="text-sm text-right font-semibold text-primary tabular-nums">Rp{{ number_format((float) $subtotal, 0, ',', '.') }}</td>
+
+                                    <td>
+                                        <div class="max-w-[150px] truncate text-xs text-base-content/60" title="{{ $trx->notes ?? '-' }}">
+                                            {{ $trx->notes ?? '-' }}
+                                        </div>
+                                    </td>
+                                </tr>
+                            @endforeach
+                        @else
+                            {{-- Jika transaksi ada tapi tidak punya detail item --}}
+                            <tr class="hover:bg-base-200/30 border-b border-base-200/60 last:border-0">
+                                <td class="text-sm text-base-content/80">{{ $trx->created_at->format('d/m/Y') }}</td>
+                                <td>
+                                    <span class="text-xs font-mono font-semibold text-base-content/50">
+                                        {{ $trx->user->member_code ?? '—' }}
+                                    </span>
+                                </td>
+                                <td class="text-sm font-medium text-base-content">{{ strtoupper($trx->user->name) }}</td>
+                                <td colspan="5" class="text-center text-sm text-base-content/50 italic">
+                                    Tidak ada rincian barang.
+                                </td>
+                            </tr>
+                        @endif
+                    @empty
+                        <tr>
+                            <td colspan="8" class="text-center py-8 text-sm text-base-content/50 italic">
+                                {{ __('Belum ada riwayat transaksi nabung.') }}
+                            </td>
+                        </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
+
+        {{-- Bagian Pagination --}}
+        @if($this->transactions->hasPages())
+            <div class="p-4 bg-base-200/20 border-t border-base-200">
+                {{ $this->transactions->links() }}
             </div>
-        @endscope
-
-        @scope('cell_total_weight_label', $row)
-            {{ rtrim(rtrim(number_format((float) $row->total_weight, 3, ',', '.'), '0'), ',') }}
-        @endscope
-
-        @scope('cell_total_value_label', $row)
-            <span class="font-medium">Rp {{ number_format((float) $row->total_value, 0, ',', '.') }}</span>
-        @endscope
-
-        @scope('cell_points_awarded', $row)
-            @if ($row->points_awarded > 0)
-                <x-mary-badge :value="$row->points_awarded.' poin'" class="badge-success badge-soft" />
-            @else
-                <span class="text-base-content/40">—</span>
-            @endif
-        @endscope
-    </x-mary-table>
+        @endif
+    </div>
 </section>

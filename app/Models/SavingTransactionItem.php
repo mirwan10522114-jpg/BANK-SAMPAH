@@ -46,6 +46,12 @@ class SavingTransactionItem extends Model
         return $this->belongsTo(WasteItem::class, 'waste_item_id');
     }
 
+    // Alias agar kompatibel dengan view yang memanggil relasi 'wasteItem'
+    public function wasteItem(): BelongsTo
+    {
+        return $this->belongsTo(WasteItem::class, 'waste_item_id');
+    }
+
     public function price(): BelongsTo
     {
         return $this->belongsTo(WastePrice::class, 'waste_price_id');

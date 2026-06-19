@@ -44,9 +44,10 @@ new #[Title('Mitra')] class extends Component {
     public function headers(): array
     {
         return [
-            ['key' => 'name', 'label' => __('Nama'), 'sortable' => false],
+            ['key' => 'name', 'label' => __('Informasi Mitra'), 'sortable' => false],
             ['key' => 'type_label', 'label' => __('Jenis'), 'class' => 'hidden md:table-cell', 'sortable' => false],
-            ['key' => 'phone', 'label' => __('Telepon'), 'class' => 'hidden lg:table-cell'],
+            ['key' => 'phone', 'label' => __('Telepon'), 'class' => 'hidden lg:table-cell', 'sortable' => false],
+            ['key' => 'address', 'label' => __('Alamat Lengkap'), 'sortable' => false, 'class' => 'w-3/12'],
             ['key' => 'status_label', 'label' => __('Status'), 'sortable' => false],
         ];
     }
@@ -173,47 +174,69 @@ new #[Title('Mitra')] class extends Component {
         </x-slot:actions>
     </x-mary-header>
 
-    <x-mary-table
-        :headers="$this->headers"
-        :rows="$this->partners"
-        with-pagination
-        striped
-    >
-        @scope('cell_name', $row)
-            <div class="font-medium">{{ $row->name }}</div>
-            @if ($row->email)
-                <div class="text-xs text-base-content/60">{{ $row->email }}</div>
-            @endif
-        @endscope
+    <!-- Bungkus tabel dengan card putih -->
+    <div class="bg-base-100 rounded-xl shadow-sm border border-base-200">
+        <x-mary-table
+            :headers="$this->headers"
+            :rows="$this->partners"
+            with-pagination
+        >
+            <!-- Kolom Informasi Mitra (Nama + Badge Email) -->
+            @scope('cell_name', $row)
+                <div class="font-medium text-base-content">{{ $row->name }}</div>
+                @if ($row->email)
+                    <x-mary-badge value="{{ $row->email }}" class="badge-success badge-soft badge-sm mt-1" />
+                @endif
+            @endscope
 
-        @scope('cell_type_label', $row)
-            <span class="text-sm">{{ ucfirst($row->type) }}</span>
-        @endscope
+            <!-- Kolom Jenis (Badge Outline) -->
+            @scope('cell_type_label', $row)
+                <div class="badge badge-outline text-xs font-medium">{{ ucfirst($row->type) }}</div>
+            @endscope
 
-        @scope('cell_status_label', $row)
-            @if ($row->is_active)
-                <x-mary-badge value="{{ __('Aktif') }}" class="badge-success badge-soft" />
-            @else
-                <x-mary-badge value="{{ __('Non-aktif') }}" class="badge-ghost" />
-            @endif
-        @endscope
+            <!-- Kolom Telepon (Ikon + Nomor) -->
+            @scope('cell_phone', $row)
+                <div class="flex items-center gap-2 text-base-content/80">
+                    <x-mary-icon name="o-phone" class="w-4 h-4 text-success/70" />
+                    <span class="text-sm">{{ $row->phone ?: '-' }}</span>
+                </div>
+            @endscope
 
-        @scope('actions', $row)
-            <div class="flex items-center gap-1">
-                <x-mary-button
-                    icon="o-pencil-square"
-                    wire:click="startEditing({{ $row->id }})"
-                    class="btn-ghost btn-sm"
-                />
-                <x-mary-button
-                    icon="o-trash"
-                    wire:click="confirmDelete({{ $row->id }})"
-                    class="btn-ghost btn-sm text-error"
-                />
-            </div>
-        @endscope
-    </x-mary-table>
+            <!-- Kolom Alamat Lengkap -->
+            @scope('cell_address', $row)
+                <div class="max-w-xs truncate text-sm text-base-content/70" title="{{ $row->address }}">
+                    {{ $row->address ?: '-' }}
+                </div>
+            @endscope
 
+            <!-- Kolom Status -->
+            @scope('cell_status_label', $row)
+                @if ($row->is_active)
+                    <x-mary-badge value="{{ __('Aktif') }}" class="badge-success badge-soft badge-sm font-medium" />
+                @else
+                    <x-mary-badge value="{{ __('Non-aktif') }}" class="badge-ghost badge-sm font-medium" />
+                @endif
+            @endscope
+
+            <!-- Kolom Aksi -->
+            @scope('actions', $row)
+                <div class="flex items-center gap-1">
+                    <x-mary-button
+                        icon="o-pencil-square"
+                        wire:click="startEditing({{ $row->id }})"
+                        class="btn-ghost btn-sm text-base-content/70"
+                    />
+                    <x-mary-button
+                        icon="o-trash"
+                        wire:click="confirmDelete({{ $row->id }})"
+                        class="btn-ghost btn-sm text-base-content/70 hover:text-error"
+                    />
+                </div>
+            @endscope
+        </x-mary-table>
+    </div>
+
+    <!-- Modal Form (Tambah/Edit) -->
     <x-mary-modal
         wire:model="formModal"
         title="{{ $editingId ? __('Edit Mitra') : __('Tambah Mitra') }}"
@@ -235,7 +258,7 @@ new #[Title('Mitra')] class extends Component {
                 <x-mary-input wire:model="email" label="{{ __('Email') }}" icon="o-envelope" type="email" />
             </div>
 
-            <x-mary-textarea wire:model="address" label="{{ __('Alamat') }}" rows="2" />
+            <x-mary-textarea wire:model="address" label="{{ __('Alamat Lengkap') }}" rows="3" placeholder="Masukkan alamat lengkap mitra..." />
             <x-mary-textarea wire:model="notes" label="{{ __('Catatan') }}" rows="2" />
             <x-mary-toggle wire:model="is_active" label="{{ __('Aktif') }}" right />
 
@@ -246,6 +269,7 @@ new #[Title('Mitra')] class extends Component {
         </x-mary-form>
     </x-mary-modal>
 
+    <!-- Modal Hapus -->
     <x-mary-modal wire:model="deleteModal" title="{{ __('Hapus Mitra') }}" box-class="max-w-md">
         <p class="text-sm text-base-content/70">
             {{ __('Mitra tidak bisa dihapus jika masih punya transaksi penjualan. Pertimbangkan nonaktifkan saja.') }}
