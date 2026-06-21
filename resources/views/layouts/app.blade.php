@@ -25,9 +25,41 @@
 <body class="min-h-screen font-sans antialiased bg-base-200 text-base-content">
 
 @php
+    use Illuminate\Support\Facades\Route;
+
     $isStaff = auth()->user()?->isAdmin() || auth()->user()?->isOwner();
 
-    $dashboardHref = $isStaff ? route('admin.dashboard') : route('dashboard');
+    /*
+     * Safe route resolver. Returns null (instead of throwing) when a route
+     * name isn't registered yet. Lets us build out menu groups for features
+     * that are still mid-development (controllers/routes not wired up yet)
+     * without taking down every other admin page.
+     */
+    $safeRoute = function (string $name, array $params = []) {
+        return Route::has($name) ? route($name, $params) : null;
+    };
+
+    /*
+     * Build a nav item. Returns null if the underlying route doesn't exist,
+     * so it can simply be filtered out below.
+     */
+    $navItem = function (string $label, string $icon, string $routeName, string $match, array $opts = []) use ($safeRoute) {
+        $href = $safeRoute($routeName, $opts['params'] ?? []);
+        if ($href === null) {
+            return null;
+        }
+
+        return array_merge([
+            'label' => $label,
+            'icon' => $icon,
+            'href' => $href,
+            'match' => $match,
+            'exact' => $opts['exact'] ?? false,
+        ], array_intersect_key($opts, array_flip(['query', 'query_value'])));
+    };
+
+    $dashboardRouteName = $isStaff ? 'admin.dashboard' : 'dashboard';
+    $dashboardHref = $safeRoute($dashboardRouteName) ?? url('/');
     $dashboardMatch = $isStaff ? '/admin' : '/dashboard';
     // Dashboard always exact — otherwise '/admin' prefix would match every
     // '/admin/*' page and highlight together with the current sub-menu.
@@ -35,21 +67,27 @@
 
     $navSections = [
         [
-            'items' => [
-                ['label' => __('Dashboard'), 'icon' => 'o-home', 'href' => $dashboardHref, 'match' => $dashboardMatch, 'exact' => $dashboardExact],
-            ],
+            'items' => array_filter([
+                [
+                    'label' => __('Dashboard'),
+                    'icon' => 'o-home',
+                    'href' => $dashboardHref,
+                    'match' => $dashboardMatch,
+                    'exact' => $dashboardExact,
+                ],
+            ]),
         ],
     ];
 
     if (! $isStaff && auth()->user()?->isNasabah()) {
         $navSections[] = [
             'label' => __('Akun Saya'),
-            'items' => [
-                ['label' => __('Saldo'), 'icon' => 'o-banknotes', 'href' => route('nasabah.saldo'), 'match' => '/saldo', 'exact' => true],
-                ['label' => __('Transaksi Nabung'), 'icon' => 'o-arrow-trending-up', 'href' => route('nasabah.transaksi'), 'match' => '/transaksi', 'exact' => true],
-                ['label' => __('Pencairan'), 'icon' => 'o-wallet', 'href' => route('nasabah.pencairan'), 'match' => '/pencairan-saya', 'exact' => true],
-                ['label' => __('Histori Poin'), 'icon' => 'o-sparkles', 'href' => route('nasabah.poin'), 'match' => '/poin', 'exact' => true],
-            ],
+            'items' => array_values(array_filter([
+                $navItem(__('Saldo'), 'o-banknotes', 'nasabah.saldo', '/saldo', ['exact' => true]),
+                $navItem(__('Transaksi Nabung'), 'o-arrow-trending-up', 'nasabah.transaksi', '/transaksi', ['exact' => true]),
+                $navItem(__('Pencairan'), 'o-wallet', 'nasabah.pencairan', '/pencairan-saya', ['exact' => true]),
+                $navItem(__('Histori Poin'), 'o-sparkles', 'nasabah.poin', '/poin', ['exact' => true]),
+            ])),
         ];
     }
 
@@ -58,66 +96,88 @@
             [
                 'label' => __('Manajemen'), 'key' => 'manajemen', 'default_open' => false,
                 'items' => [
-                    ['label' => __('Nasabah'), 'icon' => 'o-users', 'href' => route('admin.nasabah.index'), 'match' => '/admin/nasabah', 'exact' => false],
+                    $navItem(__('Nasabah'), 'o-users', 'admin.nasabah.index', '/admin/nasabah'),
                 ],
             ],
             [
                 'label' => __('Master Data'), 'key' => 'master', 'default_open' => true,
                 'items' => [
-                    ['label' => __('Kategori Sampah'), 'icon' => 'o-tag', 'href' => route('admin.waste-category.index'), 'match' => '/admin/kategori-sampah', 'exact' => false],
-                    ['label' => __('Barang Sampah'), 'icon' => 'o-hashtag', 'href' => route('admin.waste-item.index'), 'match' => '/admin/barang-sampah', 'exact' => false],
-                    ['label' => __('Mitra'), 'icon' => 'o-building-office', 'href' => route('admin.partner.index'), 'match' => '/admin/mitra', 'exact' => false],
-                    ['label' => __('Produk'), 'icon' => 'o-cube', 'href' => route('admin.product.index'), 'match' => '/admin/produk', 'exact' => false],
-                    ['label' => __('Master Poin'), 'icon' => 'o-star', 'href' => route('admin.point-rule.index'), 'match' => '/admin/master-poin', 'exact' => false],
+                    $navItem(__('Kategori Sampah'), 'o-tag', 'admin.waste-category.index', '/admin/kategori-sampah'),
+                    $navItem(__('Barang Sampah'), 'o-hashtag', 'admin.waste-item.index', '/admin/barang-sampah'),
+                    $navItem(__('Mitra'), 'o-building-office', 'admin.partner.index', '/admin/mitra'),
+                    $navItem(__('Produk'), 'o-cube', 'admin.product.index', '/admin/produk'),
+                    $navItem(__('Master Poin'), 'o-star', 'admin.point-rule.index', '/admin/master-poin'),
                 ],
             ],
             [
                 'label' => __('Transaksi'), 'key' => 'transaksi', 'default_open' => true,
                 'items' => [
-                    ['label' => __('Nabung'), 'icon' => 'o-arrow-trending-up', 'href' => route('admin.saving.index'), 'match' => '/admin/nabung', 'exact' => false],
-                    ['label' => __('Sedekah'), 'icon' => 'o-heart', 'href' => route('admin.sedekah.index'), 'match' => '/admin/sedekah', 'exact' => false],
-                    ['label' => __('Penjualan ke Mitra'), 'icon' => 'o-truck', 'href' => route('admin.sales.index'), 'match' => '/admin/penjualan', 'exact' => false],
-                    ['label' => __('Pengolahan'), 'icon' => 'o-cog-8-tooth', 'href' => route('admin.processing.index'), 'match' => '/admin/pengolahan', 'exact' => false],
-                    ['label' => __('Penjualan Produk'), 'icon' => 'o-shopping-bag', 'href' => route('admin.product-sale.index'), 'match' => '/admin/penjualan-produk', 'exact' => false],
+                    $navItem(__('Nabung'), 'o-arrow-trending-up', 'admin.saving.index', '/admin/nabung'),
+                    $navItem(__('Sedekah'), 'o-heart', 'admin.sedekah.index', '/admin/sedekah'),
+                    $navItem(__('Penjualan ke Mitra'), 'o-truck', 'admin.sales.index', '/admin/penjualan'),
+                    $navItem(__('Pengolahan'), 'o-cog-8-tooth', 'admin.processing.index', '/admin/pengolahan'),
+                    $navItem(__('Penjualan Produk'), 'o-shopping-bag', 'admin.product-sale.index', '/admin/penjualan-produk'),
                 ],
             ],
             [
                 'label' => __('Inventory'), 'key' => 'inventory', 'default_open' => true,
                 'items' => [
-                    ['label' => __('Inventory Nabung'), 'icon' => 'o-archive-box', 'href' => route('admin.inventory.index', ['source' => 'nabung']), 'match' => '/admin/inventory', 'query' => 'source', 'query_value' => 'nabung'],
-                    ['label' => __('Inventory Sedekah'), 'icon' => 'o-gift', 'href' => route('admin.inventory.index', ['source' => 'sedekah']), 'match' => '/admin/inventory', 'query' => 'source', 'query_value' => 'sedekah'],
+                    $navItem(__('Inventory Nabung'), 'o-archive-box', 'admin.inventory.index', '/admin/inventory', [
+                        'params' => ['source' => 'nabung'], 'query' => 'source', 'query_value' => 'nabung',
+                    ]),
+                    $navItem(__('Inventory Sedekah'), 'o-gift', 'admin.inventory.index', '/admin/inventory', [
+                        'params' => ['source' => 'sedekah'], 'query' => 'source', 'query_value' => 'sedekah',
+                    ]),
                 ],
             ],
             [
                 'label' => __('Keuangan'), 'key' => 'keuangan', 'default_open' => true,
                 'items' => [
-                    ['label' => __('Release Saldo'), 'icon' => 'o-arrow-right-circle', 'href' => route('admin.release.index'), 'match' => '/admin/release-saldo', 'exact' => false],
-                    ['label' => __('Pencairan'), 'icon' => 'o-wallet', 'href' => route('admin.withdrawal.index'), 'match' => '/admin/pencairan', 'exact' => false],
+                    $navItem(__('Release Saldo'), 'o-arrow-right-circle', 'admin.release.index', '/admin/release-saldo'),
+                    $navItem(__('Pencairan'), 'o-wallet', 'admin.withdrawal.index', '/admin/pencairan'),
                 ],
             ],
             [
                 'label' => __('Loyalti'), 'key' => 'loyalti', 'default_open' => false,
                 'items' => [
-                    ['label' => __('Tukar Poin → Produk'), 'icon' => 'o-gift', 'href' => route('admin.redemption.index'), 'match' => '/admin/tukar-poin', 'exact' => true],
-                    ['label' => __('Tukar Poin → Saldo'), 'icon' => 'o-banknotes', 'href' => route('admin.point-cash-out.index'), 'match' => '/admin/tukar-poin-saldo', 'exact' => false],
-                    ['label' => __('Histori Poin'), 'icon' => 'o-sparkles', 'href' => route('admin.point-history.index'), 'match' => '/admin/histori-poin', 'exact' => false],
+                    $navItem(__('Tukar Poin → Produk'), 'o-gift', 'admin.redemption.index', '/admin/tukar-poin', ['exact' => true]),
+                    $navItem(__('Tukar Poin → Saldo'), 'o-banknotes', 'admin.point-cash-out.index', '/admin/tukar-poin-saldo'),
+                    $navItem(__('Histori Poin'), 'o-sparkles', 'admin.point-history.index', '/admin/histori-poin'),
                 ],
             ],
             [
                 'label' => __('Konten'), 'key' => 'konten', 'default_open' => false,
                 'items' => [
-                    ['label' => __('Edukasi'), 'icon' => 'o-book-open', 'href' => route('admin.article.index'), 'match' => '/admin/artikel', 'exact' => false],
+                    $navItem(__('Edukasi'), 'o-book-open', 'admin.article.index', '/admin/artikel'),
+                ],
+            ],
+            [
+                'label' => __('Koperasi'), 'key' => 'koperasi', 'default_open' => true,
+                'items' => [
+                    $navItem(__('Dashboard'), 'o-chart-bar', 'admin.koperasi-dashboard.index', '/admin/koperasi-dashboard'),
+                    $navItem(__('Anggota'), 'o-user-group', 'admin.koperasi-anggota.index', '/admin/koperasi-anggota'),
+                    $navItem(__('Simpanan'), 'o-banknotes', 'admin.koperasi-simpanan.index', '/admin/koperasi-simpanan'),
+                    $navItem(__('Pinjaman'), 'o-credit-card', 'admin.koperasi-pinjaman.index', '/admin/koperasi-pinjaman'),
+                    $navItem(__('Laporan'), 'o-document-chart-bar', 'admin.koperasi-laporan.index', '/admin/koperasi-laporan'),
+                    $navItem(__('Pengaturan'), 'o-adjustments-horizontal', 'admin.koperasi-setting.index', '/admin/koperasi-setting'),
                 ],
             ],
         ];
 
         foreach ($staffGroups as $group) {
+            // Drop missing-route items, then drop the whole group if nothing's left.
+            $items = array_values(array_filter($group['items']));
+
+            if (empty($items)) {
+                continue;
+            }
+
             $navSections[] = [
                 'label' => $group['label'],
                 'key' => $group['key'],
                 'collapsible' => true,
                 'default_open' => $group['default_open'],
-                'items' => $group['items'],
+                'items' => $items,
             ];
         }
     }
@@ -137,11 +197,15 @@
         if ($item['exact'] ?? false) return $currentPath === $item['match'];
         return $currentPath === $item['match'] || str_starts_with($currentPath, $item['match'].'/');
     };
+
+    $settingsHref = $safeRoute('settings.index');
+    $logoutHref = $safeRoute('logout');
+    $homeHref = $safeRoute('home') ?? url('/');
 @endphp
 
 {{-- Mobile top bar (not persisted — tiny, re-renders per page). --}}
 <header class="lg:hidden sticky top-0 z-30 flex items-center justify-between bg-secondary text-secondary-content px-4 py-3 shadow-sm">
-    <a href="{{ route('home') }}" class="flex items-center gap-2" wire:navigate>
+    <a href="{{ $homeHref }}" class="flex items-center gap-2" wire:navigate>
         <div class="flex aspect-square size-9 items-center justify-center rounded-md bg-primary text-primary-content">
             <x-app-logo-icon class="size-5 fill-current" />
         </div>
@@ -203,7 +267,7 @@
         <nav class="flex h-screen w-64 flex-col">
             {{-- Brand --}}
             <div class="flex h-16 items-center justify-between gap-2 px-4 border-b border-secondary-content/10 shrink-0">
-                <a href="{{ route('home') }}" class="flex items-center gap-2 min-w-0" wire:navigate>
+                <a href="{{ $homeHref }}" class="flex items-center gap-2 min-w-0" wire:navigate>
                     <div class="flex aspect-square size-9 items-center justify-center rounded-md bg-primary text-primary-content shrink-0">
                         <x-app-logo-icon class="size-5 fill-current" />
                     </div>
@@ -212,7 +276,7 @@
                         <div class="text-[10px] uppercase tracking-[0.2em] text-secondary-content/60">Eco Operational</div>
                     </div>
                 </a>
-                <a href="{{ route('home') }}" class="btn btn-square btn-ghost btn-sm shrink-0 text-secondary-content hover:bg-secondary-content/10" title="{{ __('Ke Beranda Situs') }}">
+                <a href="{{ $homeHref }}" class="btn btn-square btn-ghost btn-sm shrink-0 text-secondary-content hover:bg-secondary-content/10" title="{{ __('Ke Beranda Situs') }}">
                     <x-mary-icon name="o-home" class="size-5" />
                 </a>
             </div>
@@ -239,10 +303,12 @@
                 }"
             >
                 @foreach ($navSections as $section)
+                    @continue(empty($section['items']))
+
                     @php
                         $collapsible = $section['collapsible'] ?? false;
                         $sectionKey = $section['key'] ?? ($section['label'] ?? 'nav');
-                        $serverHasActive = collect($section['items'] ?? [])->contains(fn ($i) => $isItemActive($i));
+                        $serverHasActive = collect($section['items'])->contains(fn ($i) => $isItemActive($i));
                         $serverOpen = $serverHasActive || ($section['default_open'] ?? true);
                     @endphp
 
@@ -340,40 +406,54 @@
 
             {{-- User --}}
             @if ($user = auth()->user())
-                @php
-                    $settingsActive = request()->routeIs('settings.index') || request()->routeIs('profile.edit') || request()->routeIs('security.edit') || request()->routeIs('appearance.edit');
-                @endphp
                 <div class="border-t border-secondary-content/10 p-3 space-y-2 shrink-0">
-                    <a
-                        href="{{ route('settings.index') }}"
-                        wire:navigate
-                        class="flex items-center gap-3 rounded-lg p-2 transition-colors"
-                        :class="{
-                            'bg-secondary-content/10': path.startsWith('/settings'),
-                            'hover:bg-secondary-content/10': !path.startsWith('/settings'),
-                        }"
-                    >
-                        <div class="flex size-9 shrink-0 items-center justify-center rounded-full bg-accent text-accent-content text-sm font-bold">
-                            {{ $user->initials() }}
+                    @if ($settingsHref)
+                        <a
+                            href="{{ $settingsHref }}"
+                            wire:navigate
+                            class="flex items-center gap-3 rounded-lg p-2 transition-colors"
+                            :class="{
+                                'bg-secondary-content/10': path.startsWith('/settings'),
+                                'hover:bg-secondary-content/10': !path.startsWith('/settings'),
+                            }"
+                        >
+                            <div class="flex size-9 shrink-0 items-center justify-center rounded-full bg-accent text-accent-content text-sm font-bold">
+                                {{ $user->initials() }}
+                            </div>
+                            <div class="min-w-0 flex-1">
+                                <div class="truncate text-sm font-semibold">{{ $user->name }}</div>
+                                <div class="truncate text-xs text-secondary-content/60">{{ $user->email }}</div>
+                            </div>
+                        </a>
+                    @else
+                        <div class="flex items-center gap-3 rounded-lg p-2">
+                            <div class="flex size-9 shrink-0 items-center justify-center rounded-full bg-accent text-accent-content text-sm font-bold">
+                                {{ $user->initials() }}
+                            </div>
+                            <div class="min-w-0 flex-1">
+                                <div class="truncate text-sm font-semibold">{{ $user->name }}</div>
+                                <div class="truncate text-xs text-secondary-content/60">{{ $user->email }}</div>
+                            </div>
                         </div>
-                        <div class="min-w-0 flex-1">
-                            <div class="truncate text-sm font-semibold">{{ $user->name }}</div>
-                            <div class="truncate text-xs text-secondary-content/60">{{ $user->email }}</div>
-                        </div>
-                    </a>
+                    @endif
 
                     <div class="flex gap-1">
-                        <a href="{{ route('settings.index') }}" wire:navigate class="btn btn-ghost btn-sm flex-1 justify-start text-secondary-content/80 hover:bg-secondary-content/10 hover:text-secondary-content" title="{{ __('Pengaturan') }}">
-                            <x-mary-icon name="o-cog-6-tooth" class="size-4" />
-                            <span class="text-xs">{{ __('Pengaturan') }}</span>
-                        </a>
-                        <form method="POST" action="{{ route('logout') }}">
-                            @csrf
-                            <button type="submit" class="btn btn-ghost btn-sm text-accent hover:bg-accent/15" title="{{ __('Keluar') }}">
-                                <x-mary-icon name="o-arrow-right-on-rectangle" class="size-4" />
-                                <span class="text-xs">{{ __('Keluar') }}</span>
-                            </button>
-                        </form>
+                        @if ($settingsHref)
+                            <a href="{{ $settingsHref }}" wire:navigate class="btn btn-ghost btn-sm flex-1 justify-start text-secondary-content/80 hover:bg-secondary-content/10 hover:text-secondary-content" title="{{ __('Pengaturan') }}">
+                                <x-mary-icon name="o-cog-6-tooth" class="size-4" />
+                                <span class="text-xs">{{ __('Pengaturan') }}</span>
+                            </a>
+                        @endif
+
+                        @if ($logoutHref)
+                            <form method="POST" action="{{ $logoutHref }}">
+                                @csrf
+                                <button type="submit" class="btn btn-ghost btn-sm text-accent hover:bg-accent/15" title="{{ __('Keluar') }}">
+                                    <x-mary-icon name="o-arrow-right-on-rectangle" class="size-4" />
+                                    <span class="text-xs">{{ __('Keluar') }}</span>
+                                </button>
+                            </form>
+                        @endif
                     </div>
                 </div>
             @endif

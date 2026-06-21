@@ -17,7 +17,8 @@ class WasteItemFactory extends Factory
     public function definition(): array
     {
         $name = ucfirst(fake()->unique()->words(2, true));
-        $code = strtoupper(fake()->unique()->bothify('??#'));
+        // Ubah format kombinasi menjadi 3 huruf dan 4 angka agar kapasitas uniknya besar
+        $code = strtoupper(fake()->unique()->bothify('???-####'));
 
         return [
             'waste_category_id' => WasteCategory::factory(),
