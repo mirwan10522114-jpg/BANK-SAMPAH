@@ -154,12 +154,13 @@
             [
                 'label' => __('Koperasi'), 'key' => 'koperasi', 'default_open' => true,
                 'items' => [
-                    $navItem(__('Dashboard'), 'o-chart-bar', 'admin.koperasi-dashboard.index', '/admin/koperasi-dashboard'),
-                    $navItem(__('Anggota'), 'o-user-group', 'admin.koperasi-anggota.index', '/admin/koperasi-anggota'),
-                    $navItem(__('Simpanan'), 'o-banknotes', 'admin.koperasi-simpanan.index', '/admin/koperasi-simpanan'),
-                    $navItem(__('Pinjaman'), 'o-credit-card', 'admin.koperasi-pinjaman.index', '/admin/koperasi-pinjaman'),
-                    $navItem(__('Laporan'), 'o-document-chart-bar', 'admin.koperasi-laporan.index', '/admin/koperasi-laporan'),
-                    $navItem(__('Pengaturan'), 'o-adjustments-horizontal', 'admin.koperasi-setting.index', '/admin/koperasi-setting'),
+                    $navItem(__('Dashboard'), 'o-chart-bar', 'admin.koperasi.dashboard', '/admin/koperasi/dashboard'),
+                    $navItem(__('Anggota'), 'o-users', 'admin.koperasi.anggota', '/admin/koperasi/anggota'),
+                    $navItem(__('Simpanan'), 'o-wallet', 'admin.koperasi.simpanan', '/admin/koperasi/simpanan'),
+                    $navItem(__('Penarikan Sukarela'), 'o-banknotes', 'admin.koperasi.penarikan-sukarela', '/admin/koperasi/penarikan-sukarela'),
+                    $navItem(__('Pinjaman & Angsuran'), 'o-credit-card', 'admin.koperasi.pinjaman', '/admin/koperasi/pinjaman'),
+                    $navItem(__('Laporan'), 'o-document-text', 'admin.koperasi.laporan', '/admin/koperasi/laporan'),
+                    $navItem(__('Pengaturan'), 'o-cog-6-tooth', 'admin.koperasi.pengaturan', '/admin/koperasi/pengaturan'),
                 ],
             ],
         ];

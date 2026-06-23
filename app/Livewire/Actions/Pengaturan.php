@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Livewire\Admin\Koperasi;
+namespace App\Livewire\Actions;
 
 use Livewire\Component;
 
@@ -8,7 +8,7 @@ class Pengaturan extends Component
 {
     public function render()
     {
-        return view('livewire.admin.koperasi.pengaturan')
+        return view('pages.admin.koperasi.pengaturan')
             ->layout('layouts.app', ['title' => __('Pengaturan Koperasi')]);
     }
 }

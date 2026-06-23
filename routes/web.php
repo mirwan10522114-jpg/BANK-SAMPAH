@@ -69,6 +69,20 @@ Route::middleware(['auth', 'verified', 'role:admin,owner'])
         Route::livewire('artikel', 'pages::admin.article.index')->name('article.index');
         Route::livewire('tukar-poin', 'pages::admin.redemption.index')->name('redemption.index');
         Route::livewire('tukar-poin-saldo', 'pages::admin.point-cash-out.index')->name('point-cash-out.index');
+        
+        // Modul Koperasi
+        Route::prefix('koperasi')->name('koperasi.')->group(function () {
+            Route::get('dashboard', \App\Livewire\Actions\Dashboard::class)->name('dashboard');
+            Route::get('anggota', \App\Livewire\Actions\Anggota::class)->name('anggota');
+            Route::get('simpanan', \App\Livewire\Actions\Simpanan::class)->name('simpanan');
+            
+            // Rute Penarikan Sukarela ditambahkan di sini
+            Route::get('penarikan-sukarela', \App\Livewire\Actions\PenarikanSukarela::class)->name('penarikan-sukarela');
+            
+            Route::get('pinjaman', \App\Livewire\Actions\Pinjaman::class)->name('pinjaman'); 
+            Route::get('laporan', \App\Livewire\Actions\Laporan::class)->name('laporan');
+            Route::get('pengaturan', \App\Livewire\Actions\Pengaturan::class)->name('pengaturan');
+        });
     });
 
 require __DIR__.'/settings.php';
