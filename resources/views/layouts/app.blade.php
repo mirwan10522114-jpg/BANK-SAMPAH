@@ -96,12 +96,14 @@
             [
                 'label' => __('Manajemen'), 'key' => 'manajemen', 'default_open' => false,
                 'items' => [
-                    $navItem(__('Nasabah'), 'o-users', 'admin.nasabah.index', '/admin/nasabah'),
+                    // Bagian ini dikosongkan. Silakan tambahkan menu modul baru Anda di bawah ini:
+                    // $navItem(__('Modul Baru'), 'o-star', 'admin.modul.index', '/admin/modul-baru'),
                 ],
             ],
             [
                 'label' => __('Master Data'), 'key' => 'master', 'default_open' => true,
                 'items' => [
+                    $navItem(__('Nasabah'), 'o-users', 'admin.nasabah.index', '/admin/nasabah'),
                     $navItem(__('Kategori Sampah'), 'o-tag', 'admin.waste-category.index', '/admin/kategori-sampah'),
                     $navItem(__('Barang Sampah'), 'o-hashtag', 'admin.waste-item.index', '/admin/barang-sampah'),
                     $navItem(__('Mitra'), 'o-building-office', 'admin.partner.index', '/admin/mitra'),

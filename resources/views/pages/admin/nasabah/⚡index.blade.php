@@ -456,11 +456,11 @@ new #[Title('Nasabah')] class extends Component {
                 <div class="text-center">
                     @if ($row->is_member)
                         <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-success/10 text-success border border-success/20">
-                            {{ __('Member') }}
+                            {{ __('Aktif') }}
                         </span>
                     @else
                         <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-base-200 text-base-content/60 border border-base-300/40">
-                            {{ __('Non-member') }}
+                            {{ __('Tidak Aktif') }}
                         </span>
                     @endif
                 </div>
@@ -524,7 +524,7 @@ new #[Title('Nasabah')] class extends Component {
             <!-- Area Toggle Member -->
             <div class="flex items-center justify-between p-4 rounded-xl border border-base-200 bg-base-200/30">
                 <div class="flex flex-col gap-0.5">
-                    <span class="text-sm font-semibold text-base-content">{{ __('Registrasi Sebagai Member Aktif') }}</span>
+                    <span class="text-sm font-semibold text-base-content">{{ __('Status Aktif Nasabah') }}</span>
                     <span class="text-xs text-base-content/60">{{ __('Nasabah akan berhak mengumpulkan dan menukarkan poin tabungan.') }}</span>
                 </div>
                 <x-mary-toggle wire:model.live="is_member" class="toggle-primary" right />
@@ -584,10 +584,10 @@ new #[Title('Nasabah')] class extends Component {
                             <div style="display:flex;flex-direction:column;gap:4px;">
                                 <div style="display:flex;align-items:center;gap:8px;">
                                     <h3 style="font-size:16px;font-weight:700;color:#1a1a1a;letter-spacing:-.01em;margin:0;line-height:1;">{{ $user->name }}</h3>
-                                    @if ($user->is_member)
-                                        <span style="display:inline-flex;align-items:center;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;background:rgba(34,197,94,.12);color:#16803c;">{{ __('Member') }}</span>
+                                   @if ($user->is_member)
+                                        <span style="display:inline-flex;align-items:center;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;background:rgba(34,197,94,.12);color:#16803c;">{{ __('Aktif') }}</span>
                                     @else
-                                        <span style="display:inline-flex;align-items:center;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;background:#e5e7eb;color:#6b7280;">{{ __('Non-member') }}</span>
+                                        <span style="display:inline-flex;align-items:center;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;background:#e5e7eb;color:#6b7280;">{{ __('Tidak Aktif') }}</span>
                                     @endif
                                 </div>
                                 <span style="font-size:11px;font-family:monospace;font-weight:700;color:#22c55e;letter-spacing:.08em;">{{ $user->member_code ?? '—' }}</span>

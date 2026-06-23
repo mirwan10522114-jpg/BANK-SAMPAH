@@ -80,7 +80,6 @@ class Anggota extends Component
     /* ===================== DETAIL TOTAL SIMPANAN KOPERASI (KARTU) ===================== */
     public function bukaDetailSimpanan()
     {
-        // Menghitung rincian total saldo berdasarkan jenis simpanan (hanya dari anggota yang belum keluar)
         $this->rincianSimpananKoperasi = KoperasiSimpananSaldo::whereHas('anggota', function ($q) {
                 $q->where('status', '!=', 'keluar');
             })
@@ -91,7 +90,6 @@ class Anggota extends Component
         $this->detailSimpananModal = true;
     }
 
-
     /* ===================== TAMBAH ANGGOTA ===================== */
     public function openAddModal()
     {
@@ -100,16 +98,31 @@ class Anggota extends Component
         $this->addModal = true;
     }
 
-    private function generateNomorAnggota()
+    private function generateNomorAnggota(): string
     {
-        $anggotaTerakhir = KoperasiAnggota::where('nomor_anggota', 'like', 'KP%')
-            ->get()
-            ->sortByDesc(function ($item) {
-                return (int) substr($item->nomor_anggota, 2);
-            })
+        /*
+         * WAJIB pakai withTrashed() karena model KoperasiAnggota menggunakan
+         * SoftDeletes. Tanpa withTrashed(), anggota yang sudah dihapus
+         * (deleted_at IS NOT NULL) tidak ikut dihitung, sehingga nomor yang
+         * pernah dipakai bisa dihasilkan ulang → UniqueConstraintViolationException.
+         *
+         * Contoh skenario error:
+         *   1. KP001 dibuat, lalu dihapus (soft-delete)
+         *   2. generateNomorAnggota() tidak menemukan record apapun
+         *   3. Mengembalikan 'KP001' → duplicate entry error
+         *
+         * Dengan withTrashed(), semua nomor yang pernah terpakai ikut
+         * dipertimbangkan sehingga nomor baru selalu unik.
+         *
+         * Sorting dilakukan di DB level (CAST ke UNSIGNED INT) agar efisien
+         * dan tidak perlu tarik semua record ke PHP dulu.
+         */
+        $anggotaTerakhir = KoperasiAnggota::withTrashed()
+            ->where('nomor_anggota', 'like', 'KP%')
+            ->orderByRaw('CAST(SUBSTRING(nomor_anggota, 3) AS UNSIGNED) DESC')
             ->first();
 
-        if (!$anggotaTerakhir) {
+        if (! $anggotaTerakhir) {
             return 'KP001';
         }
 
@@ -122,37 +135,43 @@ class Anggota extends Component
     public function saveMember()
     {
         $this->validate([
-            'nama' => 'required|string|max:255',
-            'no_ktp' => 'required|string|unique:koperasi_anggota,no_ktp',
+            'nama'    => 'required|string|max:255',
+            /*
+             * Validasi unique no_ktp: tambahkan ',NULL,id,deleted_at,NULL'
+             * agar rule ini hanya memeriksa record yang belum di-soft-delete.
+             * Tanpa ini, mendaftarkan ulang anggota yang pernah dihapus
+             * dengan KTP yang sama akan selalu gagal walaupun seharusnya boleh.
+             */
+            'no_ktp'  => 'required|string|unique:koperasi_anggota,no_ktp,NULL,id,deleted_at,NULL',
             'telepon' => 'required|string|max:20',
-            'alamat' => 'required|string',
+            'alamat'  => 'required|string',
         ]);
 
         DB::transaction(function () {
             $anggota = KoperasiAnggota::create([
-                'nomor_anggota' => $this->generateNomorAnggota(),
-                'nama' => $this->nama,
-                'no_ktp' => $this->no_ktp,
-                'no_telepon' => $this->telepon,
-                'alamat' => $this->alamat,
-                'status' => 'aktif',
+                'nomor_anggota'    => $this->generateNomorAnggota(),
+                'nama'             => $this->nama,
+                'no_ktp'           => $this->no_ktp,
+                'no_telepon'       => $this->telepon,
+                'alamat'           => $this->alamat,
+                'status'           => 'aktif',
                 'tanggal_bergabung' => now(),
             ]);
 
             KoperasiSimpananSaldo::create([
                 'koperasi_anggota_id' => $anggota->id,
-                'jenis_simpanan' => 'pokok',
-                'saldo' => $this->simpananPokokDefault,
+                'jenis_simpanan'      => 'pokok',
+                'saldo'               => $this->simpananPokokDefault,
             ]);
 
             KoperasiKasTransaksi::create([
-                'nomor_referensi' => 'KAS-IN-' . time(),
-                'sumber' => 'simpanan',
-                'tipe' => 'masuk',
-                'jumlah' => $this->simpananPokokDefault,
-                'keterangan' => 'Simpanan Pokok Anggota Baru a.n ' . $anggota->nama,
+                'nomor_referensi'   => 'KAS-IN-' . time(),
+                'sumber'            => 'simpanan',
+                'tipe'              => 'masuk',
+                'jumlah'            => $this->simpananPokokDefault,
+                'keterangan'        => 'Simpanan Pokok Anggota Baru a.n ' . $anggota->nama,
                 'tanggal_transaksi' => now(),
-                'user_id' => Auth::id() ?? 1,
+                'user_id'           => Auth::id() ?? 1,
             ]);
         });
 
@@ -166,11 +185,11 @@ class Anggota extends Component
         $this->resetValidation();
         $member = KoperasiAnggota::findOrFail($id);
 
-        $this->editId = $member->id;
-        $this->nama = $member->nama;
-        $this->no_ktp = $member->no_ktp;
+        $this->editId  = $member->id;
+        $this->nama    = $member->nama;
+        $this->no_ktp  = $member->no_ktp;
         $this->telepon = $member->no_telepon;
-        $this->alamat = $member->alamat;
+        $this->alamat  = $member->alamat;
 
         $this->editModal = true;
     }
@@ -178,18 +197,18 @@ class Anggota extends Component
     public function updateMember()
     {
         $this->validate([
-            'nama' => 'required|string|max:255',
-            'no_ktp' => 'required|string|unique:koperasi_anggota,no_ktp,' . $this->editId,
+            'nama'    => 'required|string|max:255',
+            'no_ktp'  => 'required|string|unique:koperasi_anggota,no_ktp,' . $this->editId . ',id,deleted_at,NULL',
             'telepon' => 'required|string|max:20',
-            'alamat' => 'required|string',
+            'alamat'  => 'required|string',
         ]);
 
         $member = KoperasiAnggota::findOrFail($this->editId);
         $member->update([
-            'nama' => $this->nama,
-            'no_ktp' => $this->no_ktp,
+            'nama'       => $this->nama,
+            'no_ktp'     => $this->no_ktp,
             'no_telepon' => $this->telepon,
-            'alamat' => $this->alamat,
+            'alamat'     => $this->alamat,
         ]);
 
         $this->editModal = false;
@@ -200,12 +219,12 @@ class Anggota extends Component
     public function openExitModal($id)
     {
         $member = KoperasiAnggota::with('simpananSaldos')->findOrFail($id);
-        $this->exitMemberId = $member->id;
+        $this->exitMemberId   = $member->id;
         $this->exitMemberName = $member->nama;
 
         $saldos = $member->simpananSaldos;
-        $this->exitSimpananPokok = (float) ($saldos->where('jenis_simpanan', 'pokok')->first()->saldo ?? 0);
-        $this->exitSimpananWajib = (float) ($saldos->where('jenis_simpanan', 'wajib')->first()->saldo ?? 0);
+        $this->exitSimpananPokok    = (float) ($saldos->where('jenis_simpanan', 'pokok')->first()->saldo ?? 0);
+        $this->exitSimpananWajib    = (float) ($saldos->where('jenis_simpanan', 'wajib')->first()->saldo ?? 0);
         $this->exitSimpananSukarela = (float) ($saldos->where('jenis_simpanan', 'sukarela')->first()->saldo ?? 0);
 
         $this->totalSimpanan = $this->exitSimpananPokok + $this->exitSimpananWajib + $this->exitSimpananSukarela;
@@ -225,27 +244,27 @@ class Anggota extends Component
             $member = KoperasiAnggota::findOrFail($this->exitMemberId);
 
             $member->update([
-                'status' => 'keluar',
+                'status'         => 'keluar',
                 'tanggal_keluar' => now(),
             ]);
 
             KoperasiAnggotaKeluar::create([
                 'koperasi_anggota_id' => $member->id,
-                'total_simpanan' => $this->totalSimpanan,
-                'sisa_pinjaman' => $this->sisaPinjaman,
-                'dana_dikembalikan' => $this->danaKembali,
-                'tanggal_keluar' => now(),
+                'total_simpanan'      => $this->totalSimpanan,
+                'sisa_pinjaman'       => $this->sisaPinjaman,
+                'dana_dikembalikan'   => $this->danaKembali,
+                'tanggal_keluar'      => now(),
             ]);
 
             if ($this->danaKembali > 0) {
                 KoperasiKasTransaksi::create([
-                    'nomor_referensi' => 'KAS-OUT-' . time(),
-                    'sumber' => 'anggota_keluar',
-                    'tipe' => 'keluar',
-                    'jumlah' => $this->danaKembali,
-                    'keterangan' => 'Pengembalian Dana Keluar a.n ' . $member->nama,
+                    'nomor_referensi'   => 'KAS-OUT-' . time(),
+                    'sumber'            => 'anggota_keluar',
+                    'tipe'              => 'keluar',
+                    'jumlah'            => $this->danaKembali,
+                    'keterangan'        => 'Pengembalian Dana Keluar a.n ' . $member->nama,
                     'tanggal_transaksi' => now(),
-                    'user_id' => Auth::id() ?? 1,
+                    'user_id'           => Auth::id() ?? 1,
                 ]);
             }
         });
@@ -260,21 +279,18 @@ class Anggota extends Component
         $member = KoperasiAnggota::findOrFail($id);
         $this->detailAnggota = $member;
 
-        // Saldo simpanan per jenis
         $saldos = KoperasiSimpananSaldo::where('koperasi_anggota_id', $id)->get();
         $this->detailSaldoSimpanan = [
-            'pokok' => (float) ($saldos->where('jenis_simpanan', 'pokok')->first()->saldo ?? 0),
-            'wajib' => (float) ($saldos->where('jenis_simpanan', 'wajib')->first()->saldo ?? 0),
+            'pokok'    => (float) ($saldos->where('jenis_simpanan', 'pokok')->first()->saldo ?? 0),
+            'wajib'    => (float) ($saldos->where('jenis_simpanan', 'wajib')->first()->saldo ?? 0),
             'sukarela' => (float) ($saldos->where('jenis_simpanan', 'sukarela')->first()->saldo ?? 0),
         ];
 
-        // 10 transaksi simpanan terakhir
         $this->detailRiwayatSimpanan = KoperasiSimpananTransaksi::where('koperasi_anggota_id', $id)
             ->orderBy('tanggal_transaksi', 'desc')
             ->limit(10)
             ->get();
 
-        // Semua pinjaman anggota ini (beserta angsuran terkait)
         $this->detailPinjamans = KoperasiPinjaman::with('angsurans')
             ->where('koperasi_anggota_id', $id)
             ->orderBy('created_at', 'desc')
@@ -287,7 +303,7 @@ class Anggota extends Component
     public function openDeleteModal($id)
     {
         $member = KoperasiAnggota::findOrFail($id);
-        $this->deleteId = $member->id;
+        $this->deleteId   = $member->id;
         $this->deleteName = $member->nama;
         $this->deleteModal = true;
     }
@@ -295,7 +311,7 @@ class Anggota extends Component
     public function deleteMember()
     {
         $member = KoperasiAnggota::findOrFail($this->deleteId);
-        $member->delete();
+        $member->delete(); // soft-delete
 
         $this->deleteModal = false;
         $this->success('Data anggota berhasil dihapus ke arsip.');
@@ -315,7 +331,7 @@ class Anggota extends Component
             ->whereNotIn('id', $activeMemberIds)
             ->update(['status' => 'pasif']);
 
-        if (!empty($activeMemberIds)) {
+        if (! empty($activeMemberIds)) {
             KoperasiAnggota::where('status', 'pasif')
                 ->whereIn('id', $activeMemberIds)
                 ->update(['status' => 'aktif']);
@@ -334,20 +350,18 @@ class Anggota extends Component
             })
             ->orderBy('created_at', 'desc');
 
-        $totalAnggotaAktif = KoperasiAnggota::where('status', 'aktif')->count();
+        $totalAnggotaAktif      = KoperasiAnggota::where('status', 'aktif')->count();
         $totalAnggotaPasifKeluar = KoperasiAnggota::whereIn('status', ['pasif', 'keluar'])->count();
 
-        // PERBAIKAN LOGIKA: Hanya jumlahkan saldo milik anggota yang MASIH ADA (tidak dihapus)
-        // dan statusnya BUKAN KELUAR.
         $summaryTotalSimpanan = (float) KoperasiSimpananSaldo::whereHas('anggota', function ($q) {
             $q->where('status', '!=', 'keluar');
         })->sum('saldo');
 
         return view('pages.admin.koperasi.anggota', [
-            'members' => $query->paginate(10),
-            'totalAnggotaAktif' => $totalAnggotaAktif,
+            'members'                => $query->paginate(10),
+            'totalAnggotaAktif'      => $totalAnggotaAktif,
             'totalAnggotaPasifKeluar' => $totalAnggotaPasifKeluar,
-            'summaryTotalSimpanan' => $summaryTotalSimpanan,
+            'summaryTotalSimpanan'   => $summaryTotalSimpanan,
         ])->layout('layouts.app', ['title' => __('Anggota Koperasi')]);
     }
 }
