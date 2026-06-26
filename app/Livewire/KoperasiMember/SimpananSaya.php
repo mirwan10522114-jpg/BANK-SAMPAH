@@ -2,32 +2,51 @@
 
 namespace App\Livewire\KoperasiMember;
 
-use App\Models\KoperasiAnggota;
-use App\Models\KoperasiSimpananTransaksi;
 use Livewire\Component;
+use Livewire\WithPagination;
+use App\Models\KoperasiSimpananTransaksi; 
+// Pastikan model yang di-use sesuai dengan yang ada di file kamu
 
 class SimpananSaya extends Component
 {
-    public ?KoperasiAnggota $anggota = null;
+    use WithPagination;
 
-    public function mount(): void
+    // Properti untuk filter tanggal
+    public $tanggal_mulai;
+    public $tanggal_akhir;
+
+    // Reset pagination ketika filter berubah
+    public function updated($property)
     {
-        $this->anggota = auth()->user()->koperasiAnggota;
+        if ($property === 'tanggal_mulai' || $property === 'tanggal_akhir') {
+            $this->resetPage();
+        }
     }
 
     public function render()
     {
-        $saldos = $this->anggota
-            ? $this->anggota->simpananSaldos()->get()
-            : collect();
+        // Ambil data transaksi khusus untuk user yang sedang login
+        $query = KoperasiSimpananTransaksi::query()
+            ->whereHas('koperasiAnggota', function($q) {
+                // Sesuaikan relasi 'koperasiAnggota' jika namanya berbeda di modelmu
+                $q->where('user_id', auth()->id());
+            });
 
-        $transaksis = $this->anggota
-            ? KoperasiSimpananTransaksi::where('koperasi_anggota_id', $this->anggota->id)
-                ->orderBy('tanggal_transaksi', 'desc')
-                ->get()
-            : collect();
+        // Terapkan filter jika 'tanggal_mulai' diisi
+        if ($this->tanggal_mulai) {
+            $query->whereDate('created_at', '>=', $this->tanggal_mulai);
+        }
 
-        return view('pages.koperasi-member.simpanan-saya', compact('saldos', 'transaksis'))
-            ->layout('layouts.app', ['title' => 'Simpanan Saya']);
+        // Terapkan filter jika 'tanggal_akhir' diisi
+        if ($this->tanggal_akhir) {
+            $query->whereDate('created_at', '<=', $this->tanggal_akhir);
+        }
+
+        // Tampilkan semua (diurutkan dari terbaru), gunakan paginate agar rapi
+        $transaksi = $query->latest()->paginate(10);
+
+        return view('pages.koperasi-member.simpanan-saya', [
+            'transaksi' => $transaksi
+        ]);
     }
 }

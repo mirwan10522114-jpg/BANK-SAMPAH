@@ -27,7 +27,11 @@
 @php
     use Illuminate\Support\Facades\Route;
 
+<<<<<<< HEAD
     $isStaff = auth()->user()?->isStaff();
+=======
+    $isStaff = auth()->user()?->isAdmin() || auth()->user()?->isOwner();
+>>>>>>> 368fa13fc346eac9fb8470d0ed8933b1febb10ea
 
     /*
      * Safe route resolver. Returns null (instead of throwing) when a route
@@ -75,7 +79,10 @@
                     'match' => $dashboardMatch,
                     'exact' => $dashboardExact,
                 ],
+<<<<<<< HEAD
                 $isStaff ? ($navItem(__('Manajemen User'), 'o-user-group', 'admin.user.index', '/admin/manajemen-user', ['exact' => false]) ?? null) : null,
+=======
+>>>>>>> 368fa13fc346eac9fb8470d0ed8933b1febb10ea
             ]),
         ],
     ];
@@ -92,6 +99,7 @@
         ];
     }
 
+<<<<<<< HEAD
     if (! $isStaff && auth()->user()?->isKoperasi()) {
         $navSections[] = [
             'label' => __('Koperasi Saya'),
@@ -102,6 +110,8 @@
         ];
     }
 
+=======
+>>>>>>> 368fa13fc346eac9fb8470d0ed8933b1febb10ea
     if ($isStaff) {
         $staffGroups = [
             [

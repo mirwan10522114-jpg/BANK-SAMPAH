@@ -4,7 +4,11 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
+<<<<<<< HEAD
     "content-hash": "066de74b3fa964188f4f135ec7570d8f",
+=======
+    "content-hash": "0eeddb523423f4aa372b72a961655947",
+>>>>>>> 368fa13fc346eac9fb8470d0ed8933b1febb10ea
     "packages": [
         {
             "name": "bacon/bacon-qr-code",
@@ -2655,6 +2659,7 @@
             "time": "2026-04-02T20:48:35+00:00"
         },
         {
+<<<<<<< HEAD
             "name": "livewire/volt",
             "version": "v1.10.5",
             "source": {
@@ -2726,6 +2731,8 @@
             "time": "2026-03-18T14:16:30+00:00"
         },
         {
+=======
+>>>>>>> 368fa13fc346eac9fb8470d0ed8933b1febb10ea
             "name": "monolog/monolog",
             "version": "3.10.0",
             "source": {
@@ -9389,12 +9396,21 @@
     ],
     "aliases": [],
     "minimum-stability": "stable",
+<<<<<<< HEAD
     "stability-flags": [],
+=======
+    "stability-flags": {},
+>>>>>>> 368fa13fc346eac9fb8470d0ed8933b1febb10ea
     "prefer-stable": true,
     "prefer-lowest": false,
     "platform": {
         "php": "^8.3"
     },
+<<<<<<< HEAD
     "platform-dev": [],
     "plugin-api-version": "2.3.0"
+=======
+    "platform-dev": {},
+    "plugin-api-version": "2.6.0"
+>>>>>>> 368fa13fc346eac9fb8470d0ed8933b1febb10ea
 }

@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Actions;
 
+<<<<<<< HEAD
 use App\Models\KoperasiAnggota;
 use App\Models\KoperasiKasTransaksi;
 use App\Models\KoperasiSimpananSaldo;
@@ -11,20 +12,38 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 use Livewire\Component;
 use Livewire\WithPagination;
+=======
+use Livewire\Component;
+use Livewire\WithPagination;
+use App\Models\KoperasiAnggota;
+use App\Models\KoperasiSimpananSaldo;
+use App\Models\KoperasiSimpananTransaksi;
+use App\Models\KoperasiKasTransaksi;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Auth;
+>>>>>>> 368fa13fc346eac9fb8470d0ed8933b1febb10ea
 use Mary\Traits\Toast;
 
 class Simpanan extends Component
 {
+<<<<<<< HEAD
     use Toast, WithPagination;
 
     public $search = '';
 
     public $jenisFilter = '';
 
+=======
+    use WithPagination, Toast;
+
+    public $search = '';
+    public $jenisFilter = '';
+>>>>>>> 368fa13fc346eac9fb8470d0ed8933b1febb10ea
     public $tipeFilter = '';
 
     // Form Modal Transaksi
     public bool $transactionModal = false;
+<<<<<<< HEAD
 
     public $selectedAnggotaId = null;
 
@@ -36,6 +55,13 @@ class Simpanan extends Component
 
     public $keterangan = '';
 
+=======
+    public $selectedAnggotaId = null;
+    public $jenis_simpanan = 'wajib';
+    public $tipe_transaksi = 'setor';
+    public $jumlah = '';
+    public $keterangan = '';
+>>>>>>> 368fa13fc346eac9fb8470d0ed8933b1febb10ea
     public $tanggal_transaksi;
 
     // State Saldo Real-Time
@@ -47,7 +73,10 @@ class Simpanan extends Component
 
     // State Kuitansi / Struk
     public bool $receiptModal = false;
+<<<<<<< HEAD
 
+=======
+>>>>>>> 368fa13fc346eac9fb8470d0ed8933b1febb10ea
     public $receiptData = null;
 
     public function mount()
@@ -101,6 +130,7 @@ class Simpanan extends Component
 
     private function generateNomorTransaksi()
     {
+<<<<<<< HEAD
         $prefix = 'SIM-'.now()->format('Ymd').'-';
 
         // Atomically compute the next sequence number. The whole lookup-and-pad
@@ -116,6 +146,15 @@ class Simpanan extends Component
 
             return $prefix.str_pad((string) $nextNum, 4, '0', STR_PAD_LEFT);
         });
+=======
+        $prefix = 'SIM-' . now()->format('Ymd') . '-';
+        $lastTx = KoperasiSimpananTransaksi::where('nomor_transaksi', 'like', $prefix . '%')
+            ->orderBy('nomor_transaksi', 'desc')
+            ->first();
+
+        $nextNum = $lastTx ? ((int) substr($lastTx->nomor_transaksi, -4)) + 1 : 1;
+        return $prefix . str_pad($nextNum, 4, '0', STR_PAD_LEFT);
+>>>>>>> 368fa13fc346eac9fb8470d0ed8933b1febb10ea
     }
 
     public function saveTransaction()
@@ -133,16 +172,23 @@ class Simpanan extends Component
         if ($this->tipe_transaksi === 'tarik') {
             if ($this->jenis_simpanan !== 'sukarela') {
                 $this->addError('jenis_simpanan', 'Hanya Simpanan Sukarela yang dapat ditarik tunai harian.');
+<<<<<<< HEAD
 
+=======
+>>>>>>> 368fa13fc346eac9fb8470d0ed8933b1febb10ea
                 return;
             }
             if ($this->jumlah > $this->saldoSekarang['sukarela']) {
                 $this->addError('jumlah', 'Saldo simpanan sukarela tidak mencukupi untuk penarikan ini.');
+<<<<<<< HEAD
 
+=======
+>>>>>>> 368fa13fc346eac9fb8470d0ed8933b1febb10ea
                 return;
             }
         }
 
+<<<<<<< HEAD
         try {
             DB::transaction(function () {
                 // 1. Dapatkan atau buat entri saldo, lalu KUNCI barisnya supaya
@@ -213,6 +259,56 @@ class Simpanan extends Component
         $this->transactionModal = false;
         $this->success('Transaksi berhasil diproses.');
 
+=======
+        DB::transaction(function () {
+            // 1. Dapatkan atau buat entri saldo
+            $saldoRecord = KoperasiSimpananSaldo::firstOrCreate(
+                ['koperasi_anggota_id' => $this->selectedAnggotaId, 'jenis_simpanan' => $this->jenis_simpanan],
+                ['saldo' => 0]
+            );
+
+            $saldoSebelum = $saldoRecord->saldo;
+            $saldoSesudah = $this->tipe_transaksi === 'setor' 
+                ? $saldoSebelum + $this->jumlah 
+                : $saldoSebelum - $this->jumlah;
+
+            // 2. Catat Histori Transaksi Simpanan
+            $nomorTx = $this->generateNomorTransaksi();
+            $transaksi = KoperasiSimpananTransaksi::create([
+                'nomor_transaksi' => $nomorTx,
+                'koperasi_anggota_id' => $this->selectedAnggotaId,
+                'jenis_simpanan' => $this->jenis_simpanan,
+                'tipe' => $this->tipe_transaksi,
+                'jumlah' => $this->jumlah,
+                'saldo_sebelum' => $saldoSebelum,
+                'saldo_sesudah' => $saldoSesudah,
+                'keterangan' => $this->keterangan ?: ($this->tipe_transaksi === 'setor' ? 'Setoran Simpanan ' : 'Penarikan Simpanan ') . ucfirst($this->jenis_simpanan),
+                'tanggal_transaksi' => $this->tanggal_transaksi,
+                'user_id' => Auth::id() ?? 1,
+            ]);
+
+            // 3. Update Saldo Utama
+            $saldoRecord->update(['saldo' => $saldoSesudah]);
+
+            // 4. Catat di Buku Kas Utama Koperasi
+            KoperasiKasTransaksi::create([
+                'nomor_referensi' => $nomorTx,
+                'sumber' => 'simpanan',
+                'tipe' => $this->tipe_transaksi === 'setor' ? 'masuk' : 'keluar',
+                'jumlah' => $this->jumlah,
+                'keterangan' => $transaksi->keterangan . ' a.n ' . KoperasiAnggota::find($this->selectedAnggotaId)->nama,
+                'tanggal_transaksi' => $this->tanggal_transaksi,
+                'user_id' => Auth::id() ?? 1,
+            ]);
+
+            // Siapkan data untuk kuitansi
+            $this->receiptData = $transaksi->load(['anggota', 'user']);
+        });
+
+        $this->transactionModal = false;
+        $this->success('Transaksi berhasil diproses.');
+        
+>>>>>>> 368fa13fc346eac9fb8470d0ed8933b1febb10ea
         // Buka modal struk kuitansi
         $this->receiptModal = true;
     }
@@ -223,12 +319,21 @@ class Simpanan extends Component
         $transactions = KoperasiSimpananTransaksi::with(['anggota', 'user'])
             ->when($this->search, function ($q) {
                 $q->whereHas('anggota', function ($sub) {
+<<<<<<< HEAD
                     $sub->where('nama', 'like', '%'.$this->search.'%')
                         ->orWhere('nomor_anggota', 'like', '%'.$this->search.'%');
                 })->orWhere('nomor_transaksi', 'like', '%'.$this->search.'%');
             })
             ->when($this->jenisFilter, fn ($q) => $q->where('jenis_simpanan', $this->jenisFilter))
             ->when($this->tipeFilter, fn ($q) => $q->where('tipe', $this->tipeFilter))
+=======
+                    $sub->where('nama', 'like', '%' . $this->search . '%')
+                        ->orWhere('nomor_anggota', 'like', '%' . $this->search . '%');
+                })->orWhere('nomor_transaksi', 'like', '%' . $this->search . '%');
+            })
+            ->when($this->jenisFilter, fn($q) => $q->where('jenis_simpanan', $this->jenisFilter))
+            ->when($this->tipeFilter, fn($q) => $q->where('tipe', $this->tipeFilter))
+>>>>>>> 368fa13fc346eac9fb8470d0ed8933b1febb10ea
             ->orderBy('tanggal_transaksi', 'desc')
             ->paginate(15);
 
@@ -238,8 +343,12 @@ class Simpanan extends Component
             ->get()
             ->map(function ($item) {
                 // Modifikasi label agar mudah dicari (ID - Nama)
+<<<<<<< HEAD
                 $item->nama_label = $item->nomor_anggota.' - '.$item->nama;
 
+=======
+                $item->nama_label = $item->nomor_anggota . ' - ' . $item->nama;
+>>>>>>> 368fa13fc346eac9fb8470d0ed8933b1febb10ea
                 return $item;
             });
 
@@ -248,4 +357,8 @@ class Simpanan extends Component
             'anggotaAktif' => $anggotaAktif,
         ])->layout('layouts.app', ['title' => __('Transaksi Simpanan')]);
     }
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> 368fa13fc346eac9fb8470d0ed8933b1febb10ea

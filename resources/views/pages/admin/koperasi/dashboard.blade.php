@@ -1,8 +1,13 @@
+<<<<<<< HEAD
 @assets
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
 @endassets
 
 <div class="w-full pb-10" x-data="dashboardData()">
+=======
+<div class="w-full pb-10" x-data="dashboardData()">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+>>>>>>> 368fa13fc346eac9fb8470d0ed8933b1febb10ea
 
     <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
         <div>
@@ -138,6 +143,7 @@
     </div>
 </div>
 
+<<<<<<< HEAD
 @script
 <script>
     // Simpan di luar Alpine data — elak Alpine deep-proxy Chart.js instance → stack overflow
@@ -232,3 +238,101 @@
     }));
 </script>
 @endscript
+=======
+<script>
+    document.addEventListener('alpine:init', () => {
+        Alpine.data('dashboardData', () => ({
+            currentDate: '',
+            currentTime: '',
+            lineChartInstance: null,
+            donutChartInstance: null,
+
+            init() {
+                Chart.defaults.font.family = "'Inter', 'Segoe UI', 'Roboto', 'Arial', sans-serif";
+                Chart.defaults.color = '#64748B';
+
+                this.startClock();
+                
+                const initLabels = {!! json_encode($chartBulan) !!};
+                const initMasuk = {!! json_encode($chartPemasukan) !!};
+                const initKeluar = {!! json_encode($chartPengeluaran) !!};
+                const initSimpanan = {!! json_encode($komposisiSimpananArray) !!};
+                
+                this.buildCharts(initLabels, initMasuk, initKeluar, initSimpanan);
+
+                // Watch langsung ke property Livewire (bukan event custom).
+                // Begitu loadData() di server selesai & chartBulan ke-update,
+                // Alpine otomatis kebawa reaktif lewat $wire — tidak lewat
+                // sistem event sama sekali, jadi tidak ada celah timing.
+                this.$watch('$wire.chartBulan', () => {
+                    this.refreshCharts({
+                        labels: this.$wire.chartBulan,
+                        masuk: this.$wire.chartPemasukan,
+                        keluar: this.$wire.chartPengeluaran,
+                        simpanan: this.$wire.komposisiSimpananArray,
+                    });
+                });
+            },
+
+            // Pembaruan Grafik
+            refreshCharts(data) {
+                if(this.lineChartInstance && data.labels) {
+                    this.lineChartInstance.data.labels = data.labels;
+                    this.lineChartInstance.data.datasets[0].data = data.masuk;
+                    this.lineChartInstance.data.datasets[1].data = data.keluar;
+                    this.lineChartInstance.update();
+                }
+                if(this.donutChartInstance && data.simpanan) {
+                    this.donutChartInstance.data.datasets[0].data = data.simpanan;
+                    this.donutChartInstance.update();
+                }
+            },
+
+            startClock() {
+                const updateTime = () => {
+                    const now = new Date();
+                    const optionsDate = { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' };
+                    this.currentDate = now.toLocaleDateString('id-ID', optionsDate);
+                    this.currentTime = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }).replace('.', ':');
+                };
+                updateTime();
+                setInterval(updateTime, 1000);
+            },
+
+            buildCharts(labels, masuk, keluar, simpanan) {
+                const ctxLine = document.getElementById('lineChart').getContext('2d');
+                const gradientMasuk = ctxLine.createLinearGradient(0, 0, 0, 300);
+                gradientMasuk.addColorStop(0, 'rgba(16, 185, 129, 0.2)'); 
+                gradientMasuk.addColorStop(1, 'rgba(16, 185, 129, 0)');
+
+                const gradientKeluar = ctxLine.createLinearGradient(0, 0, 0, 300);
+                gradientKeluar.addColorStop(0, 'rgba(239, 68, 68, 0.2)'); 
+                gradientKeluar.addColorStop(1, 'rgba(239, 68, 68, 0)');
+
+                this.lineChartInstance = new Chart(ctxLine, {
+                    type: 'line',
+                    data: {
+                        labels: labels,
+                        datasets: [
+                            { label: 'Pemasukan', data: masuk, borderColor: '#10B981', backgroundColor: gradientMasuk, borderWidth: 2.5, fill: true, tension: 0.4, pointRadius: 4, pointBackgroundColor: '#fff', pointBorderColor: '#10B981' },
+                            { label: 'Pengeluaran', data: keluar, borderColor: '#EF4444', backgroundColor: gradientKeluar, borderWidth: 2.5, fill: true, tension: 0.4, pointRadius: 4, pointBackgroundColor: '#fff', pointBorderColor: '#EF4444' }
+                        ]
+                    },
+                    options: {
+                        responsive: true, maintainAspectRatio: false,
+                        plugins: { legend: { position: 'top', align: 'end', labels: { usePointStyle: true, boxWidth: 8, font: { size: 12, weight: '500' } } }, tooltip: { mode: 'index', intersect: false, backgroundColor: 'rgba(17, 24, 39, 0.9)', padding: 12 } },
+                        scales: { y: { border: { display: false }, grid: { color: '#F1F5F9', drawBorder: false }, ticks: { font: { size: 11 } } }, x: { grid: { display: false, drawBorder: false }, ticks: { font: { size: 11 } } } }
+                    }
+                });
+
+                const ctxDonut = document.getElementById('donutChart').getContext('2d');
+                this.donutChartInstance = new Chart(ctxDonut, {
+                    type: 'doughnut',
+                    data: { labels: ['Pokok', 'Wajib', 'Sukarela'], datasets: [{ data: simpanan, backgroundColor: ['#3B82F6', '#10B981', '#F97316'], borderWidth: 0, hoverOffset: 4 }] },
+                    options: { responsive: true, maintainAspectRatio: false, cutout: '75%', plugins: { legend: { display: false }, tooltip: { backgroundColor: 'rgba(17, 24, 39, 0.9)', padding: 10 } } }
+                });
+            }
+        }));
+    });
+</script>
+>>>>>>> 368fa13fc346eac9fb8470d0ed8933b1febb10ea

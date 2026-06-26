@@ -131,9 +131,9 @@ class Anggota extends Component
          * pernah dipakai bisa dihasilkan ulang → UniqueConstraintViolationException.
          *
          * Contoh skenario error:
-         *   1. KP001 dibuat, lalu dihapus (soft-delete)
-         *   2. generateNomorAnggota() tidak menemukan record apapun
-         *   3. Mengembalikan 'KP001' → duplicate entry error
+         * 1. KP001 dibuat, lalu dihapus (soft-delete)
+         * 2. generateNomorAnggota() tidak menemukan record apapun
+         * 3. Mengembalikan 'KP001' → duplicate entry error
          *
          * Dengan withTrashed(), semua nomor yang pernah terpakai ikut
          * dipertimbangkan sehingga nomor baru selalu unik.

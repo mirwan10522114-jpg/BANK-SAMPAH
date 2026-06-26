@@ -29,7 +29,11 @@ class CreateNewUser implements CreatesNewUsers
             'name' => $input['name'],
             'email' => $input['email'],
             'password' => $input['password'],
+<<<<<<< HEAD
             'roles' => [UserRole::Nasabah->value],
+=======
+            'role' => UserRole::Nasabah,
+>>>>>>> 368fa13fc346eac9fb8470d0ed8933b1febb10ea
         ]);
     }
 }

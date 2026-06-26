@@ -64,7 +64,11 @@ class DemoTransactionSeeder extends Seeder
                 [
                     'name' => $def['name'],
                     'password' => Hash::make('password'),
+<<<<<<< HEAD
                     'roles' => [UserRole::Nasabah->value],
+=======
+                    'role' => UserRole::Nasabah,
+>>>>>>> 368fa13fc346eac9fb8470d0ed8933b1febb10ea
                     'phone' => '08'.fake()->numerify('##########'),
                     'address' => fake()->address(),
                     'is_member' => $def['member'],

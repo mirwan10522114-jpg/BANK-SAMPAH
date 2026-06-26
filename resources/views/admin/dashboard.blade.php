@@ -72,9 +72,14 @@
         $catData   = [];
     }
 
+<<<<<<< HEAD
     // MODE TESTING — hanya aktif di non-production (local/staging) supaya
     // dashboard tidak kosong saat development. Otomatis OFF di production.
     $testingMode = ! app()->isProduction();
+=======
+    // MODE TESTING — set ke false saat production
+    $testingMode = true;
+>>>>>>> 368fa13fc346eac9fb8470d0ed8933b1febb10ea
     if ($testingMode && empty($catData)) {
         $catLabels = $categories->pluck('name')->toArray();
         $catData   = $categories->map(fn() => rand(25, 200))->toArray();
@@ -278,10 +283,15 @@
             <div style="display:flex; flex-wrap:wrap; gap:8px; align-items:center; width:100%;">
                 <span style="font-size:13px; font-weight:700; color:#64847c; text-transform:uppercase; letter-spacing:0.05em; margin-right:4px;">FILTER:</span>
 
+<<<<<<< HEAD
                 {{-- Data chart bersifat BULANAN, jadi filter juga per bulan.
                      Sebelumnya tombol "7 Hari"/"30 Hari" salah label dan keduanya
                      memetakan ke data-months=1 (copy-paste bug). --}}
                 <button class="filter-chip active" data-months="1"  onclick="setChartRange(1, this)">1 Bulan</button>
+=======
+                <button class="filter-chip active" data-months="1"  onclick="setChartRange(1, this)">7 Hari</button>
+                <button class="filter-chip"        data-months="1"  onclick="setChartRange(1, this)">30 Hari</button>
+>>>>>>> 368fa13fc346eac9fb8470d0ed8933b1febb10ea
                 <button class="filter-chip"        data-months="3"  onclick="setChartRange(3, this)">3 Bulan</button>
                 <button class="filter-chip"        data-months="6"  onclick="setChartRange(6, this)">6 Bulan</button>
                 <button class="filter-chip"        data-months="12" onclick="setChartRange(12, this)">1 Tahun</button>

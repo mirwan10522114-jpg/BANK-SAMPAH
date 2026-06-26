@@ -6,9 +6,15 @@ namespace App\Services;
 
 use App\Mail\EmailOtpMail;
 use App\Models\EmailOtp;
+<<<<<<< HEAD
 use Illuminate\Cache\RateLimiter;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
+=======
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Str;
+>>>>>>> 368fa13fc346eac9fb8470d0ed8933b1febb10ea
 use InvalidArgumentException;
 use RuntimeException;
 
@@ -17,6 +23,7 @@ use RuntimeException;
  *
  * OTP codes are 6-digit numeric, hashed in DB, TTL 10 minutes, 5 attempt cap.
  * A 60-second cooldown between issues throttles abuse.
+<<<<<<< HEAD
  *
  * Defense-in-depth rate limiting (on top of the per-code rules above):
  *  - SEND  is throttled per email AND per IP, to stop mail-bombing across
@@ -45,6 +52,11 @@ class EmailOtpService
         private readonly RateLimiter $limiter,
     ) {}
 
+=======
+ */
+class EmailOtpService
+{
+>>>>>>> 368fa13fc346eac9fb8470d0ed8933b1febb10ea
     /**
      * Generate and email a new OTP for the given email + purpose.
      * Invalidates any existing unused OTPs for the same pair.
@@ -54,11 +66,14 @@ class EmailOtpService
         $this->assertPurpose($purpose);
 
         $email = strtolower(trim($email));
+<<<<<<< HEAD
         $ip = $this->clientIp();
 
         // Throttle issuance per email and per IP — independent caps.
         $this->assertNotTooMany('otp:send:email:'.$email, self::SEND_PER_EMAIL, self::SEND_WINDOW_MINUTES * 60);
         $this->assertNotTooMany('otp:send:ip:'.$ip, self::SEND_PER_IP, self::SEND_WINDOW_MINUTES * 60);
+=======
+>>>>>>> 368fa13fc346eac9fb8470d0ed8933b1febb10ea
 
         $recent = EmailOtp::query()
             ->where('email', $email)
@@ -92,10 +107,13 @@ class EmailOtpService
             'created_at' => now(),
         ]);
 
+<<<<<<< HEAD
         // Only count a successful issuance toward the rate limit.
         $this->limiter->hit('otp:send:email:'.$email, self::SEND_WINDOW_MINUTES * 60);
         $this->limiter->hit('otp:send:ip:'.$ip, self::SEND_WINDOW_MINUTES * 60);
 
+=======
+>>>>>>> 368fa13fc346eac9fb8470d0ed8933b1febb10ea
         Mail::to($email)->send(new EmailOtpMail($code, $purpose));
 
         return $otp;
@@ -111,6 +129,7 @@ class EmailOtpService
 
         $email = strtolower(trim($email));
         $code = trim($code);
+<<<<<<< HEAD
         $ip = $this->clientIp();
 
         // Throttle brute-force attempts per (email, purpose, IP). This caps the
@@ -120,6 +139,10 @@ class EmailOtpService
 
         if (! preg_match('/^\d{6}$/', $code)) {
             $this->limiter->hit($verifyKey, self::VERIFY_WINDOW_MINUTES * 60);
+=======
+
+        if (! preg_match('/^\d{6}$/', $code)) {
+>>>>>>> 368fa13fc346eac9fb8470d0ed8933b1febb10ea
             throw new InvalidArgumentException('Kode harus 6 digit angka.');
         }
 
@@ -131,7 +154,10 @@ class EmailOtpService
             ->first();
 
         if (! $otp) {
+<<<<<<< HEAD
             $this->limiter->hit($verifyKey, self::VERIFY_WINDOW_MINUTES * 60);
+=======
+>>>>>>> 368fa13fc346eac9fb8470d0ed8933b1febb10ea
             throw new InvalidArgumentException('Kode tidak ditemukan. Minta kode baru.');
         }
 
@@ -145,7 +171,10 @@ class EmailOtpService
 
         if (! Hash::check($code, $otp->code_hash)) {
             $otp->increment('attempts');
+<<<<<<< HEAD
             $this->limiter->hit($verifyKey, self::VERIFY_WINDOW_MINUTES * 60);
+=======
+>>>>>>> 368fa13fc346eac9fb8470d0ed8933b1febb10ea
 
             $remaining = EmailOtp::MAX_ATTEMPTS - $otp->attempts;
 
@@ -155,6 +184,7 @@ class EmailOtpService
         $otp->used_at = now();
         $otp->save();
 
+<<<<<<< HEAD
         // Clear the verify limiter on success so a legitimate user isn't penalized.
         $this->limiter->clear($verifyKey);
 
@@ -179,6 +209,11 @@ class EmailOtpService
         return request()?->ip() ?? '127.0.0.1';
     }
 
+=======
+        return $otp;
+    }
+
+>>>>>>> 368fa13fc346eac9fb8470d0ed8933b1febb10ea
     private function generateCode(): string
     {
         return str_pad((string) random_int(0, 999999), 6, '0', STR_PAD_LEFT);

@@ -26,10 +26,14 @@ class BalanceService
         }
 
         return DB::transaction(function () use ($nasabah, $amount, $admin, $notes) {
+<<<<<<< HEAD
             // lockForUpdate serializes concurrent balance mutations on the
             // same nasabah, closing the read-check-write race window.
             $balance = Balance::firstOrCreate(['user_id' => $nasabah->id]);
             $balance = Balance::where('user_id', $nasabah->id)->lockForUpdate()->first();
+=======
+            $balance = Balance::firstOrCreate(['user_id' => $nasabah->id]);
+>>>>>>> 368fa13fc346eac9fb8470d0ed8933b1febb10ea
 
             if ((float) $balance->saldo_tertahan < $amount) {
                 throw new InvalidArgumentException('Saldo tertahan tidak cukup.');
@@ -90,7 +94,10 @@ class BalanceService
 
         return DB::transaction(function () use ($nasabah, $amount, $method, $admin, $meta, $notes) {
             $balance = Balance::firstOrCreate(['user_id' => $nasabah->id]);
+<<<<<<< HEAD
             $balance = Balance::where('user_id', $nasabah->id)->lockForUpdate()->first();
+=======
+>>>>>>> 368fa13fc346eac9fb8470d0ed8933b1febb10ea
 
             if ((float) $balance->saldo_tersedia < $amount) {
                 throw new InvalidArgumentException('Saldo tersedia tidak cukup.');

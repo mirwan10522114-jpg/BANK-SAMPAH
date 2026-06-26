@@ -51,25 +51,19 @@ class Dashboard extends Component
 
     public function setDefaultDates()
     {
-        $hariIni = now(); // satu instance Carbon, dipakai konsisten
+        $hariIni = now();
 
         $this->tanggal_akhir = $hariIni->copy()->format('Y-m-d');
 
         if ($this->periode === '6_bulan') {
             $this->tanggal_mulai = $hariIni->copy()->subMonths(5)->startOfMonth()->format('Y-m-d');
         } elseif ($this->periode === '1_tahun') {
-            // 11 Bulan ke belakang + Bulan ini = 12 Bulan (1 Tahun)
             $this->tanggal_mulai = $hariIni->copy()->subMonths(11)->startOfMonth()->format('Y-m-d');
         } elseif ($this->periode === 'bulan_ini') {
             $this->tanggal_mulai = $hariIni->copy()->startOfMonth()->format('Y-m-d');
         }
-        // Untuk 'custom': tanggal_mulai/tanggal_akhir TIDAK disentuh di sini,
-        // karena nilainya berasal dari input yang diisi user sendiri.
     }
 
-    // Dipanggil oleh wire:change di Blade setiap dropdown periode berubah.
-    // Untuk preset (bukan custom), langsung hitung ulang & muat data — TIDAK
-    // butuh tombol "Terapkan" sama sekali.
     public function gantiPeriode()
     {
         if ($this->periode !== 'custom') {
@@ -80,10 +74,6 @@ class Dashboard extends Component
         }
     }
 
-    // Khusus dipakai saat user benar-benar memilih rentang tanggal manual
-    // (periode = 'custom'). TIDAK memaksa overwrite periode preset yang
-    // sedang aktif — supaya tidak menimpa tanggal yang baru saja dihitung
-    // oleh gantiPeriode() dengan tanggal lama.
     public function terapkanFilterKustom()
     {
         if (! $this->tanggal_mulai || ! $this->tanggal_akhir) {
@@ -98,10 +88,6 @@ class Dashboard extends Component
             return;
         }
 
-        // Hanya set ke 'custom' jika memang user mengedit tanggal secara manual
-        // (dropdown periode-nya juga "custom"). Kalau dropdown masih di preset
-        // (mis. '1_tahun') tapi tombol Terapkan tetap diklik, JANGAN ubah periode
-        // — cukup pakai ulang tanggal preset yang sudah benar.
         if ($this->periode !== 'custom') {
             $this->setDefaultDates();
         }
@@ -197,10 +183,6 @@ class Dashboard extends Component
         $this->chartBulan = array_values($bulanLabels);
         $this->chartPemasukan = array_values($pemasukanData);
         $this->chartPengeluaran = array_values($pengeluaranData);
-
-        // Catatan: tidak ada dispatch('update-charts') di sini. Chart di-render
-        // ulang via Alpine $watch('$wire.chartBulan') di view, jadi Livewire
-        // otomatis menyinkronkan props baru ke browser saat loadData() selesai.
     }
 
     public function render()

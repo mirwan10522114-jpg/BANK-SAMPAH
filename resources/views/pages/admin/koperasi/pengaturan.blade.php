@@ -16,12 +16,17 @@
                             <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                                 <span class="text-gray-500 font-semibold">Rp</span>
                             </div>
+<<<<<<< HEAD
                             <input type="number" wire:model="nominal_simpanan_pokok" class="input input-bordered w-full pl-12 h-11 bg-gray-50 focus:bg-white text-gray-800 font-bold focus:ring-2 focus:ring-blue-100 focus:border-blue-500 transition-colors" placeholder="0" required />
+=======
+                            <input type="number" wire:model="simpanan_pokok" class="input input-bordered w-full pl-12 h-11 bg-gray-50 focus:bg-white text-gray-800 font-bold focus:ring-2 focus:ring-blue-100 focus:border-blue-500 transition-colors" placeholder="0" required />
+>>>>>>> 368fa13fc346eac9fb8470d0ed8933b1febb10ea
                         </div>
                         <p class="text-xs text-gray-500 mt-2 flex items-center gap-1.5">
                             <x-mary-icon name="o-information-circle" class="size-3.5 text-gray-400" />
                             {{ __('Wajib dibayar sekali saat anggota baru mendaftar.') }}
                         </p>
+<<<<<<< HEAD
                         @error('nominal_simpanan_pokok') <span class="text-xs text-red-500 font-medium mt-1">{{ $message }}</span> @enderror
                     </div>
 
@@ -53,6 +58,24 @@
                             {{ __('Potongan satu-kali per pengajuan pinjaman (bukan bunga). Pinjaman koperasi ini tanpa bunga.') }}
                         </p>
                         @error('biaya_admin_pinjaman') <span class="text-xs text-red-500 font-medium mt-1">{{ $message }}</span> @enderror
+=======
+                        @error('simpanan_pokok') <span class="text-xs text-red-500 font-medium mt-1">{{ $message }}</span> @enderror
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700 mb-2">{{ __('Bunga Pinjaman (% per tahun)') }}</label>
+                        <div class="relative w-full md:w-1/2">
+                            <input type="number" step="0.1" wire:model="bunga_pinjaman" class="input input-bordered w-full h-11 bg-gray-50 focus:bg-white text-gray-800 font-bold focus:ring-2 focus:ring-blue-100 focus:border-blue-500 transition-colors" placeholder="0" required />
+                            <div class="absolute inset-y-0 right-0 pr-4 flex items-center pointer-events-none">
+                                <span class="text-gray-500 font-semibold">%</span>
+                            </div>
+                        </div>
+                        <p class="text-xs text-gray-500 mt-2 flex items-center gap-1.5">
+                            <x-mary-icon name="o-information-circle" class="size-3.5 text-gray-400" />
+                            {{ __('Digunakan untuk perhitungan bunga cicilan pinjaman.') }}
+                        </p>
+                        @error('bunga_pinjaman') <span class="text-xs text-red-500 font-medium mt-1">{{ $message }}</span> @enderror
+>>>>>>> 368fa13fc346eac9fb8470d0ed8933b1febb10ea
                     </div>
 
                     <hr class="border-gray-200">
@@ -72,6 +95,7 @@
                         @error('saldo_kas_awal') <span class="text-xs text-red-500 font-medium mt-1">{{ $message }}</span> @enderror
                     </div>
 
+<<<<<<< HEAD
                     <div>
                         <label class="block text-sm font-bold text-gray-700 mb-2">{{ __('Tanggal Mulai Saldo Awal') }}</label>
                         <input type="date" wire:model="tanggal_saldo_awal" class="input input-bordered w-full md:w-1/2 h-11 bg-gray-50 focus:bg-white text-gray-800 font-bold focus:ring-2 focus:ring-blue-100 focus:border-blue-500 transition-colors" />
@@ -82,6 +106,8 @@
                         @error('tanggal_saldo_awal') <span class="text-xs text-red-500 font-medium mt-1">{{ $message }}</span> @enderror
                     </div>
 
+=======
+>>>>>>> 368fa13fc346eac9fb8470d0ed8933b1febb10ea
                     <div class="pt-2">
                         <button type="submit" wire:loading.attr="disabled" class="btn h-11 bg-blue-600 hover:bg-blue-700 text-white font-bold border-none shadow-sm rounded-lg px-6 flex items-center gap-2">
                             <span wire:loading wire:target="simpanPengaturan" class="loading loading-spinner loading-sm"></span>
@@ -110,8 +136,13 @@
                     </li>
                     <li class="flex items-center gap-3">
                         <x-mary-icon name="c-check-circle" class="size-5 text-green-500 shrink-0" />
+<<<<<<< HEAD
                         <span class="text-sm font-semibold text-gray-700 flex-1">{{ __('Sistem Pinjaman') }}</span>
                         <span class="badge badge-sm badge-ghost font-bold text-xs uppercase">{{ __('Tanpa Bunga') }}</span>
+=======
+                        <span class="text-sm font-semibold text-gray-700 flex-1">{{ __('Kalkulasi Bunga') }}</span>
+                        <span class="badge badge-sm badge-ghost font-bold text-xs uppercase">{{ __('Manual') }}</span>
+>>>>>>> 368fa13fc346eac9fb8470d0ed8933b1febb10ea
                     </li>
                     <li class="flex items-center gap-3">
                         <x-mary-icon name="c-check-circle" class="size-5 text-green-500 shrink-0" />

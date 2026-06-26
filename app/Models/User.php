@@ -13,14 +13,21 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+<<<<<<< HEAD
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+=======
+>>>>>>> 368fa13fc346eac9fb8470d0ed8933b1febb10ea
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Str;
 
+<<<<<<< HEAD
 #[Fillable(['name', 'email', 'password', 'roles', 'phone', 'address', 'is_member', 'member_joined_at'])]
+=======
+#[Fillable(['name', 'email', 'password', 'role', 'phone', 'address', 'is_member', 'member_joined_at'])]
+>>>>>>> 368fa13fc346eac9fb8470d0ed8933b1febb10ea
 #[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable implements MustVerifyEmail
 {
@@ -40,17 +47,30 @@ class User extends Authenticatable implements MustVerifyEmail
         }
     }
 
+<<<<<<< HEAD
+=======
+    /**
+     * Get the attributes that should be cast.
+     *
+     * @return array<string, string>
+     */
+>>>>>>> 368fa13fc346eac9fb8470d0ed8933b1febb10ea
     protected function casts(): array
     {
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+<<<<<<< HEAD
             'roles' => 'array',
+=======
+            'role' => UserRole::class,
+>>>>>>> 368fa13fc346eac9fb8470d0ed8933b1febb10ea
             'is_member' => 'boolean',
             'member_joined_at' => 'date',
         ];
     }
 
+<<<<<<< HEAD
     public function scopeNasabah(Builder $query): Builder
     {
         return $query->whereJsonContains('roles', UserRole::Nasabah->value);
@@ -61,20 +81,37 @@ class User extends Authenticatable implements MustVerifyEmail
         $value = $role instanceof UserRole ? $role->value : $role;
 
         return in_array($value, $this->roles ?? [], strict: true);
+=======
+    /**
+     * Scope the query to nasabah users only.
+     */
+    public function scopeNasabah(Builder $query): Builder
+    {
+        return $query->where('role', UserRole::Nasabah);
+>>>>>>> 368fa13fc346eac9fb8470d0ed8933b1febb10ea
     }
 
     public function isAdmin(): bool
     {
+<<<<<<< HEAD
         return $this->hasRole(UserRole::Admin);
+=======
+        return $this->role === UserRole::Admin;
+>>>>>>> 368fa13fc346eac9fb8470d0ed8933b1febb10ea
     }
 
     public function isOwner(): bool
     {
+<<<<<<< HEAD
         return $this->hasRole(UserRole::Owner);
+=======
+        return $this->role === UserRole::Owner;
+>>>>>>> 368fa13fc346eac9fb8470d0ed8933b1febb10ea
     }
 
     public function isNasabah(): bool
     {
+<<<<<<< HEAD
         return $this->hasRole(UserRole::Nasabah);
     }
 
@@ -91,6 +128,14 @@ class User extends Authenticatable implements MustVerifyEmail
     public function koperasiAnggota(): HasOne
     {
         return $this->hasOne(KoperasiAnggota::class);
+=======
+        return $this->role === UserRole::Nasabah;
+    }
+
+    public function hasRole(UserRole $role): bool
+    {
+        return $this->role === $role;
+>>>>>>> 368fa13fc346eac9fb8470d0ed8933b1febb10ea
     }
 
     public function balance(): HasOne
@@ -113,6 +158,12 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->hasMany(PointHistory::class);
     }
 
+<<<<<<< HEAD
+=======
+    /**
+     * Get the user's initials
+     */
+>>>>>>> 368fa13fc346eac9fb8470d0ed8933b1febb10ea
     public function initials(): string
     {
         return Str::of($this->name)

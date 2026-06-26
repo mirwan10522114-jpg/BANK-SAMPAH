@@ -31,8 +31,12 @@ class ProductInventoryService
         }
 
         return DB::transaction(function () use ($product, $quantity, $reason, $sourceRef, $createdBy, $notes) {
+<<<<<<< HEAD
             // Lock the product row so concurrent stock changes serialize.
             $product = Product::lockForUpdate()->findOrFail($product->id);
+=======
+            $product->refresh();
+>>>>>>> 368fa13fc346eac9fb8470d0ed8933b1febb10ea
             $product->stock = (float) $product->stock + $quantity;
             $product->save();
 
@@ -63,8 +67,12 @@ class ProductInventoryService
         }
 
         return DB::transaction(function () use ($product, $quantity, $reason, $sourceRef, $createdBy, $notes) {
+<<<<<<< HEAD
             // Lock the product row so concurrent deductions serialize.
             $product = Product::lockForUpdate()->findOrFail($product->id);
+=======
+            $product->refresh();
+>>>>>>> 368fa13fc346eac9fb8470d0ed8933b1febb10ea
 
             if ((float) $product->stock < $quantity) {
                 $available = number_format((float) $product->stock, 3, ',', '.');

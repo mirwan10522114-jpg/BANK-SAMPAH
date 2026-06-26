@@ -129,9 +129,12 @@ class SavingTransactionService
             }
 
             $balance = Balance::firstOrCreate(['user_id' => $nasabah->id]);
+<<<<<<< HEAD
             // Lock the row before mutating saldo/poin to serialize concurrent
             // transactions on the same nasabah (e.g. two deposits at once).
             $balance = Balance::where('user_id', $nasabah->id)->lockForUpdate()->first();
+=======
+>>>>>>> 368fa13fc346eac9fb8470d0ed8933b1febb10ea
             $balance->saldo_tertahan = (float) $balance->saldo_tertahan + $totalValue;
             $balance->points = (int) $balance->points + $points;
             $balance->save();

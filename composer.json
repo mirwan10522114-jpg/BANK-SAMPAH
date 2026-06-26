@@ -14,7 +14,10 @@
         "laravel/framework": "^13.0",
         "laravel/tinker": "^3.0",
         "livewire/livewire": "*",
+<<<<<<< HEAD
         "livewire/volt": "^1.10",
+=======
+>>>>>>> 368fa13fc346eac9fb8470d0ed8933b1febb10ea
         "robsontenorio/mary": "*"
     },
     "require-dev": {

@@ -48,8 +48,11 @@ class RedemptionService
 
         return DB::transaction(function () use ($nasabah, $product, $quantity, $pointsUsed, $processedBy, $notes) {
             $balance = Balance::firstOrCreate(['user_id' => $nasabah->id]);
+<<<<<<< HEAD
             // Lock to serialize concurrent redemptions on the same nasabah.
             $balance = Balance::where('user_id', $nasabah->id)->lockForUpdate()->first();
+=======
+>>>>>>> 368fa13fc346eac9fb8470d0ed8933b1febb10ea
 
             if ((int) $balance->points < $pointsUsed) {
                 throw new InvalidArgumentException('Poin nasabah tidak cukup.');

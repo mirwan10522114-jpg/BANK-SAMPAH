@@ -201,8 +201,12 @@
                 <x-mary-input wire:model="no_ktp" label="Nomor KTP" placeholder="Masukkan 16 digit NIK" required />
                 <x-mary-input wire:model="telepon" label="Nomor Telepon" placeholder="Contoh: 08123..." required />
                 <x-mary-textarea wire:model="alamat" label="Alamat Lengkap" placeholder="Masukkan alamat domisili" required rows="3"></x-mary-textarea>
+<<<<<<< HEAD
                 <x-mary-select wire:model="userId" label="Hubungkan ke Akun User (Opsional)" placeholder="— Tidak dihubungkan —" :options="$userOptions" option-value="id" option-label="name" />
 
+=======
+                
+>>>>>>> 368fa13fc346eac9fb8470d0ed8933b1febb10ea
                 <div class="p-4 bg-gray-50 rounded-lg border border-gray-200 mt-4">
                     <p class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Simpanan Pokok (Otomatis)</p>
                     <p class="text-xl font-black text-gray-900">Rp {{ number_format($simpananPokokDefault, 0, ',', '.') }}</p>
@@ -226,7 +230,10 @@
                 <x-mary-input wire:model="no_ktp" label="Nomor KTP" placeholder="Masukkan 16 digit NIK" required />
                 <x-mary-input wire:model="telepon" label="Nomor Telepon" placeholder="Contoh: 08123..." required />
                 <x-mary-textarea wire:model="alamat" label="Alamat Lengkap" placeholder="Masukkan alamat domisili" required rows="3"></x-mary-textarea>
+<<<<<<< HEAD
                 <x-mary-select wire:model="userId" label="Hubungkan ke Akun User (Opsional)" placeholder="— Tidak dihubungkan —" :options="$userOptions" option-value="id" option-label="name" />
+=======
+>>>>>>> 368fa13fc346eac9fb8470d0ed8933b1febb10ea
             </div>
         </form>
         <x-slot:actions>

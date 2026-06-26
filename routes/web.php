@@ -33,8 +33,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
         }
 
         if ($user->isNasabah()) {
-    return redirect()->route('nasabah.dashboard');
-}
+            return redirect()->route('nasabah.dashboard');
+        }
 
         if ($user->isKoperasi()) {
             return redirect()->route('koperasi.member.simpanan');
@@ -97,7 +97,7 @@ Route::middleware(['auth', 'verified', 'role:admin,owner'])
             Route::get('anggota', \App\Livewire\Actions\Anggota::class)->name('anggota');
             Route::get('simpanan', \App\Livewire\Actions\Simpanan::class)->name('simpanan');
             
-            // Rute Penarikan Sukarela ditambahkan di sini
+            // Rute Penarikan Sukarela
             Route::get('penarikan-sukarela', \App\Livewire\Actions\PenarikanSukarela::class)->name('penarikan-sukarela');
             
             Route::get('pinjaman', \App\Livewire\Actions\Pinjaman::class)->name('pinjaman'); 

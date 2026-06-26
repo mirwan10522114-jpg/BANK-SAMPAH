@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Actions;
 
+<<<<<<< HEAD
 use App\Models\KoperasiAnggota;
 use App\Models\KoperasiKasTransaksi;
 use App\Models\KoperasiPinjaman as KoperasiPinjamanModel;
@@ -12,18 +13,36 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 use Livewire\Component;
 use Livewire\WithPagination;
+=======
+use Livewire\Component;
+use Livewire\WithPagination;
+use App\Models\KoperasiAnggota;
+use App\Models\KoperasiPinjaman as KoperasiPinjamanModel;
+use App\Models\KoperasiPinjamanAngsuran;
+use App\Models\KoperasiKasTransaksi;
+use App\Models\KoperasiSetting;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Auth;
+>>>>>>> 368fa13fc346eac9fb8470d0ed8933b1febb10ea
 use Mary\Traits\Toast;
 
 class Pinjaman extends Component
 {
+<<<<<<< HEAD
     use Toast, WithPagination;
 
     public $search = '';
 
+=======
+    use WithPagination, Toast;
+
+    public $search = '';
+>>>>>>> 368fa13fc346eac9fb8470d0ed8933b1febb10ea
     public $statusFilter = '';
 
     // ===== Form Modal Pengajuan/Pencairan Pinjaman =====
     public bool $pinjamanModal = false;
+<<<<<<< HEAD
 
     public $selectedAnggotaId = null;
 
@@ -35,6 +54,13 @@ class Pinjaman extends Component
 
     public $tanggal_pengajuan;
 
+=======
+    public $selectedAnggotaId = null;
+    public $jumlah_pinjaman = '';
+    public $tenor_bulan = '';
+    public $biaya_admin = 0;
+    public $tanggal_pengajuan;
+>>>>>>> 368fa13fc346eac9fb8470d0ed8933b1febb10ea
     public $keterangan_pinjaman = '';
 
     // Estimasi angsuran (ditampilkan live, dihitung dari jumlah & tenor)
@@ -42,6 +68,7 @@ class Pinjaman extends Component
 
     // ===== Form Modal Pembayaran Angsuran =====
     public bool $angsuranModal = false;
+<<<<<<< HEAD
 
     public $selectedPinjamanId = null;
 
@@ -53,13 +80,24 @@ class Pinjaman extends Component
 
     public $tanggal_bayar;
 
+=======
+    public $selectedPinjamanId = null;
+    public $pinjamanAktif = null; // data pinjaman terpilih (untuk info di modal)
+    public $angsuranKe = null;
+    public $jumlah_bayar = '';
+    public $tanggal_bayar;
+>>>>>>> 368fa13fc346eac9fb8470d0ed8933b1febb10ea
     public $keterangan_angsuran = '';
 
     // ===== State Kuitansi =====
     public bool $receiptModal = false;
+<<<<<<< HEAD
 
     public $receiptType = null; // 'pinjaman' | 'angsuran'
 
+=======
+    public $receiptType = null; // 'pinjaman' | 'angsuran'
+>>>>>>> 368fa13fc346eac9fb8470d0ed8933b1febb10ea
     public $receiptData = null;
 
     public function mount()
@@ -111,6 +149,7 @@ class Pinjaman extends Component
 
     private function generateNomorPinjaman()
     {
+<<<<<<< HEAD
         $prefix = 'PINJ-'.now()->format('Ymd').'-';
 
         // Atomically derive the next sequence so two concurrent loan
@@ -125,6 +164,15 @@ class Pinjaman extends Component
 
             return $prefix.str_pad((string) $nextNum, 4, '0', STR_PAD_LEFT);
         });
+=======
+        $prefix = 'PINJ-' . now()->format('Ymd') . '-';
+        $last = KoperasiPinjamanModel::where('nomor_pinjaman', 'like', $prefix . '%')
+            ->orderBy('nomor_pinjaman', 'desc')
+            ->first();
+
+        $nextNum = $last ? ((int) substr($last->nomor_pinjaman, -4)) + 1 : 1;
+        return $prefix . str_pad($nextNum, 4, '0', STR_PAD_LEFT);
+>>>>>>> 368fa13fc346eac9fb8470d0ed8933b1febb10ea
     }
 
     public function savePinjaman()
@@ -162,17 +210,25 @@ class Pinjaman extends Component
             ]);
 
             // Catat di Buku Kas Utama Koperasi: pencairan pinjaman = kas keluar
+<<<<<<< HEAD
             $namaAnggota = KoperasiAnggota::find($this->selectedAnggotaId)->nama;
+=======
+>>>>>>> 368fa13fc346eac9fb8470d0ed8933b1febb10ea
             KoperasiKasTransaksi::create([
                 'nomor_referensi' => $nomorPinjaman,
                 'sumber' => 'pinjaman',
                 'tipe' => 'keluar',
                 'jumlah' => $this->jumlah_pinjaman,
+<<<<<<< HEAD
                 'keterangan' => 'Pencairan Pinjaman a.n '.$namaAnggota,
+=======
+                'keterangan' => 'Pencairan Pinjaman a.n ' . KoperasiAnggota::find($this->selectedAnggotaId)->nama,
+>>>>>>> 368fa13fc346eac9fb8470d0ed8933b1febb10ea
                 'tanggal_transaksi' => $this->tanggal_pengajuan,
                 'user_id' => Auth::id() ?? 1,
             ]);
 
+<<<<<<< HEAD
             // Biaya admin yang dipungut koperasi saat pencairan WAJIB masuk
             // kas (kas masuk) supaya neraca konsisten dengan pinjaman yang
             // tercatat. Sebelumnya biaya admin tidak pernah ter-mirror ke
@@ -189,6 +245,8 @@ class Pinjaman extends Component
                 ]);
             }
 
+=======
+>>>>>>> 368fa13fc346eac9fb8470d0ed8933b1febb10ea
             $this->receiptType = 'pinjaman';
             $this->receiptData = $pinjaman->load(['anggota', 'user']);
         });
@@ -234,6 +292,7 @@ class Pinjaman extends Component
             'keterangan_angsuran' => 'nullable|string|max:255',
         ]);
 
+<<<<<<< HEAD
         // Cek dilakukan di dalam transaction pada baris yang dikunci, agar
         // tidak ada TOCTOU antara validasi ini dan pembaruan sisa_pinjaman.
         $pinjaman = KoperasiPinjamanModel::find($this->selectedPinjamanId);
@@ -300,6 +359,55 @@ class Pinjaman extends Component
             return;
         }
 
+=======
+        $pinjaman = KoperasiPinjamanModel::find($this->selectedPinjamanId);
+
+        if (!$pinjaman || $pinjaman->status !== 'berjalan') {
+            $this->addError('selectedPinjamanId', 'Pinjaman ini sudah tidak berstatus berjalan.');
+            return;
+        }
+
+        if ($this->jumlah_bayar > $pinjaman->sisa_pinjaman) {
+            $this->addError('jumlah_bayar', 'Jumlah bayar melebihi sisa pinjaman (Rp ' . number_format($pinjaman->sisa_pinjaman, 0, ',', '.') . ').');
+            return;
+        }
+
+        DB::transaction(function () use ($pinjaman) {
+            $angsuranKe = $pinjaman->angsuranKeBerikutnya();
+            $sisaSetelah = $pinjaman->sisa_pinjaman - $this->jumlah_bayar;
+
+            $angsuran = KoperasiPinjamanAngsuran::create([
+                'koperasi_pinjaman_id' => $pinjaman->id,
+                'angsuran_ke' => $angsuranKe,
+                'jumlah_bayar' => $this->jumlah_bayar,
+                'tanggal_bayar' => $this->tanggal_bayar,
+                'sisa_pinjaman_setelah' => $sisaSetelah,
+                'keterangan' => $this->keterangan_angsuran,
+                'user_id' => Auth::id() ?? 1,
+            ]);
+
+            // Update sisa pinjaman & status (auto Lunas jika sisa = 0)
+            $pinjaman->update([
+                'sisa_pinjaman' => $sisaSetelah,
+                'status' => $sisaSetelah <= 0 ? 'lunas' : 'berjalan',
+            ]);
+
+            // Catat di Buku Kas Utama Koperasi: pembayaran angsuran = kas masuk
+            KoperasiKasTransaksi::create([
+                'nomor_referensi' => $pinjaman->nomor_pinjaman,
+                'sumber' => 'angsuran',
+                'tipe' => 'masuk',
+                'jumlah' => $this->jumlah_bayar,
+                'keterangan' => 'Pembayaran Angsuran ke-' . $angsuranKe . ' a.n ' . $pinjaman->anggota->nama,
+                'tanggal_transaksi' => $this->tanggal_bayar,
+                'user_id' => Auth::id() ?? 1,
+            ]);
+
+            $this->receiptType = 'angsuran';
+            $this->receiptData = $angsuran->load(['pinjaman.anggota', 'user']);
+        });
+
+>>>>>>> 368fa13fc346eac9fb8470d0ed8933b1febb10ea
         $this->angsuranModal = false;
         $this->success('Pembayaran angsuran berhasil dicatat.');
         $this->receiptModal = true;
@@ -310,11 +418,19 @@ class Pinjaman extends Component
         $pinjamans = KoperasiPinjamanModel::with(['anggota', 'user'])
             ->when($this->search, function ($q) {
                 $q->whereHas('anggota', function ($sub) {
+<<<<<<< HEAD
                     $sub->where('nama', 'like', '%'.$this->search.'%')
                         ->orWhere('nomor_anggota', 'like', '%'.$this->search.'%');
                 })->orWhere('nomor_pinjaman', 'like', '%'.$this->search.'%');
             })
             ->when($this->statusFilter, fn ($q) => $q->where('status', $this->statusFilter))
+=======
+                    $sub->where('nama', 'like', '%' . $this->search . '%')
+                        ->orWhere('nomor_anggota', 'like', '%' . $this->search . '%');
+                })->orWhere('nomor_pinjaman', 'like', '%' . $this->search . '%');
+            })
+            ->when($this->statusFilter, fn($q) => $q->where('status', $this->statusFilter))
+>>>>>>> 368fa13fc346eac9fb8470d0ed8933b1febb10ea
             ->orderBy('created_at', 'desc')
             ->paginate(15);
 
@@ -323,8 +439,12 @@ class Pinjaman extends Component
             ->select('id', 'nomor_anggota', 'nama')
             ->get()
             ->map(function ($item) {
+<<<<<<< HEAD
                 $item->nama_label = $item->nomor_anggota.' - '.$item->nama;
 
+=======
+                $item->nama_label = $item->nomor_anggota . ' - ' . $item->nama;
+>>>>>>> 368fa13fc346eac9fb8470d0ed8933b1febb10ea
                 return $item;
             });
 
@@ -333,9 +453,14 @@ class Pinjaman extends Component
             ->where('status', 'berjalan')
             ->get()
             ->map(function ($item) {
+<<<<<<< HEAD
                 $item->pinjaman_label = $item->nomor_pinjaman.' - '.$item->anggota->nama
                     .' (Sisa Rp '.number_format($item->sisa_pinjaman, 0, ',', '.').')';
 
+=======
+                $item->pinjaman_label = $item->nomor_pinjaman . ' - ' . $item->anggota->nama
+                    . ' (Sisa Rp ' . number_format($item->sisa_pinjaman, 0, ',', '.') . ')';
+>>>>>>> 368fa13fc346eac9fb8470d0ed8933b1febb10ea
                 return $item;
             });
 
@@ -345,4 +470,8 @@ class Pinjaman extends Component
             'pinjamanBerjalan' => $pinjamanBerjalan,
         ])->layout('layouts.app', ['title' => __('Pinjaman & Angsuran')]);
     }
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> 368fa13fc346eac9fb8470d0ed8933b1febb10ea

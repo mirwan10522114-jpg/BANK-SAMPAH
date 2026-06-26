@@ -47,12 +47,15 @@ class InventoryService
                 ['waste_item_id' => $item->id, 'source' => $source],
                 ['stock' => 0],
             );
+<<<<<<< HEAD
             // Lock the stock row so concurrent in/out movements on the same
             // (item, source) are serialized.
             $inventory = Inventory::where('waste_item_id', $item->id)
                 ->where('source', $source)
                 ->lockForUpdate()
                 ->first();
+=======
+>>>>>>> 368fa13fc346eac9fb8470d0ed8933b1febb10ea
             $inventory->stock = (float) $inventory->stock + $quantity;
             $inventory->save();
 
@@ -91,11 +94,14 @@ class InventoryService
                 ['waste_item_id' => $item->id, 'source' => $source],
                 ['stock' => 0],
             );
+<<<<<<< HEAD
             // Lock to serialize concurrent deductions on the same stock row.
             $inventory = Inventory::where('waste_item_id', $item->id)
                 ->where('source', $source)
                 ->lockForUpdate()
                 ->first();
+=======
+>>>>>>> 368fa13fc346eac9fb8470d0ed8933b1febb10ea
 
             if ((float) $inventory->stock < $quantity) {
                 $available = number_format((float) $inventory->stock, 3, ',', '.');
