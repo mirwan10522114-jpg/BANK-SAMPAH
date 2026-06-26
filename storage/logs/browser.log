@@ -1,0 +1,98 @@
+[2026-06-26 05:10:10] local.ERROR: Uncaught SyntaxError: Failed to execute 'replaceWith' on 'Element': Identifier 'rawMonthsData' has already been declared http://127.0.0.1:8000/admin 1 1 SyntaxError Failed to execute 'replaceWith' on 'Element': Identifier 'rawMonthsData' has already been declared SyntaxError: Identifier 'rawMonthsData' has already been declared
+    at swapCurrentPageWithNewHtml (http://127.0.0.1:8000/livewire-f6f6ff74/livewire.js?id=6b3709b1:12785:19)
+    at http://127.0.0.1:8000/livewire-f6f6ff74/livewire.js?id=6b3709b1:12988:11
+    at preventAlpineFromPickingUpDomChanges (http://127.0.0.1:8000/livewire-f6f6ff74/livewire.js?id=6b3709b1:13075:5)
+    at http://127.0.0.1:8000/livewire-f6f6ff74/livewire.js?id=6b3709b1:12978:9
+    at prefetches.<computed>.whenFinished (http://127.0.0.1:8000/livewire-f6f6ff74/livewire.js?id=6b3709b1:12513:9)
+    at storeThePrefetchedHtmlForWhenALinkIsClicked (http://127.0.0.1:8000/livewire-f6f6ff74/livewire.js?id=6b3709b1:12497:11)
+    at http://127.0.0.1:8000/livewire-f6f6ff74/livewire.js?id=6b3709b1:12952:11
+    at http://127.0.0.1:8000/livewire-f6f6ff74/livewire.js?id=6b3709b1:12486:7
+    at sendNavigateRequest (http://127.0.0.1:8000/livewire-f6f6ff74/livewire.js?id=6b3709b1:5655:7) {"url":"http://127.0.0.1:8000/admin","user_agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36 Edg/149.0.0.0","timestamp":"2026-06-26T05:10:10.117Z"} 
+[2026-06-26 05:10:10] local.ERROR: Uncaught SyntaxError: Failed to execute 'replaceWith' on 'Element': Identifier 'rawMonthsData' has already been declared http://127.0.0.1:8000/admin 1 1 SyntaxError Failed to execute 'replaceWith' on 'Element': Identifier 'rawMonthsData' has already been declared SyntaxError: Identifier 'rawMonthsData' has already been declared
+    at swapCurrentPageWithNewHtml (http://127.0.0.1:8000/livewire-f6f6ff74/livewire.js?id=6b3709b1:12785:19)
+    at http://127.0.0.1:8000/livewire-f6f6ff74/livewire.js?id=6b3709b1:12988:11
+    at preventAlpineFromPickingUpDomChanges (http://127.0.0.1:8000/livewire-f6f6ff74/livewire.js?id=6b3709b1:13075:5)
+    at http://127.0.0.1:8000/livewire-f6f6ff74/livewire.js?id=6b3709b1:12978:9
+    at prefetches.<computed>.whenFinished (http://127.0.0.1:8000/livewire-f6f6ff74/livewire.js?id=6b3709b1:12513:9)
+    at storeThePrefetchedHtmlForWhenALinkIsClicked (http://127.0.0.1:8000/livewire-f6f6ff74/livewire.js?id=6b3709b1:12497:11)
+    at http://127.0.0.1:8000/livewire-f6f6ff74/livewire.js?id=6b3709b1:12952:11
+    at http://127.0.0.1:8000/livewire-f6f6ff74/livewire.js?id=6b3709b1:12486:7
+    at sendNavigateRequest (http://127.0.0.1:8000/livewire-f6f6ff74/livewire.js?id=6b3709b1:5655:7) {"url":"http://127.0.0.1:8000/admin","user_agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36 Edg/149.0.0.0","timestamp":"2026-06-26T05:10:10.119Z"} 
+[2026-06-26 05:34:53] local.ERROR: Unhandled Promise Rejection SyntaxError Invalid or unexpected token SyntaxError: Invalid or unexpected token {"url":"http://127.0.0.1:8000/dashboard-saya","user_agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36 Edg/149.0.0.0","timestamp":"2026-06-26T05:34:53.028Z"} 
+[2026-06-26 05:34:59] local.ERROR: Unhandled Promise Rejection SyntaxError Invalid or unexpected token SyntaxError: Invalid or unexpected token
+    at Array.<anonymous> (http://127.0.0.1:8000/livewire-f6f6ff74/livewire.js?id=6b3709b1:6032:9)
+    at trigger2 (http://127.0.0.1:8000/livewire-f6f6ff74/livewire.js?id=6b3709b1:4342:34)
+    at Component.processEffects (http://127.0.0.1:8000/livewire-f6f6ff74/livewire.js?id=6b3709b1:6405:7)
+    at new Component (http://127.0.0.1:8000/livewire-f6f6ff74/livewire.js?id=6b3709b1:6346:12)
+    at initComponent (http://127.0.0.1:8000/livewire-f6f6ff74/livewire.js?id=6b3709b1:6672:21)
+    at http://127.0.0.1:8000/livewire-f6f6ff74/livewire.js?id=6b3709b1:13883:30
+    at http://127.0.0.1:8000/livewire-f6f6ff74/livewire.js?id=6b3709b1:2232:58
+    at http://127.0.0.1:8000/livewire-f6f6ff74/livewire.js?id=6b3709b1:1806:42
+    at Array.forEach (<anonymous>)
+    at http://127.0.0.1:8000/livewire-f6f6ff74/livewire.js?id=6b3709b1:1806:27 {"url":"http://127.0.0.1:8000/dashboard-saya","user_agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36 Edg/149.0.0.0","timestamp":"2026-06-26T05:34:59.249Z"} 
+[2026-06-26 05:35:40] local.ERROR: Unhandled Promise Rejection SyntaxError Invalid or unexpected token SyntaxError: Invalid or unexpected token
+    at Array.<anonymous> (http://127.0.0.1:8000/livewire-f6f6ff74/livewire.js?id=6b3709b1:6032:9)
+    at trigger2 (http://127.0.0.1:8000/livewire-f6f6ff74/livewire.js?id=6b3709b1:4342:34)
+    at Component.processEffects (http://127.0.0.1:8000/livewire-f6f6ff74/livewire.js?id=6b3709b1:6405:7)
+    at new Component (http://127.0.0.1:8000/livewire-f6f6ff74/livewire.js?id=6b3709b1:6346:12)
+    at initComponent (http://127.0.0.1:8000/livewire-f6f6ff74/livewire.js?id=6b3709b1:6672:21)
+    at http://127.0.0.1:8000/livewire-f6f6ff74/livewire.js?id=6b3709b1:13883:30
+    at http://127.0.0.1:8000/livewire-f6f6ff74/livewire.js?id=6b3709b1:2232:58
+    at http://127.0.0.1:8000/livewire-f6f6ff74/livewire.js?id=6b3709b1:1806:42
+    at Array.forEach (<anonymous>)
+    at http://127.0.0.1:8000/livewire-f6f6ff74/livewire.js?id=6b3709b1:1806:27 {"url":"http://127.0.0.1:8000/dashboard-saya","user_agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36 Edg/149.0.0.0","timestamp":"2026-06-26T05:35:39.384Z"} 
+[2026-06-26 05:36:16] local.ERROR: Unhandled Promise Rejection SyntaxError Invalid or unexpected token SyntaxError: Invalid or unexpected token
+    at Array.<anonymous> (http://127.0.0.1:8000/livewire-f6f6ff74/livewire.js?id=6b3709b1:6032:9)
+    at trigger2 (http://127.0.0.1:8000/livewire-f6f6ff74/livewire.js?id=6b3709b1:4342:34)
+    at Component.processEffects (http://127.0.0.1:8000/livewire-f6f6ff74/livewire.js?id=6b3709b1:6405:7)
+    at new Component (http://127.0.0.1:8000/livewire-f6f6ff74/livewire.js?id=6b3709b1:6346:12)
+    at initComponent (http://127.0.0.1:8000/livewire-f6f6ff74/livewire.js?id=6b3709b1:6672:21)
+    at http://127.0.0.1:8000/livewire-f6f6ff74/livewire.js?id=6b3709b1:13883:30
+    at http://127.0.0.1:8000/livewire-f6f6ff74/livewire.js?id=6b3709b1:2232:58
+    at http://127.0.0.1:8000/livewire-f6f6ff74/livewire.js?id=6b3709b1:1806:42
+    at Array.forEach (<anonymous>)
+    at http://127.0.0.1:8000/livewire-f6f6ff74/livewire.js?id=6b3709b1:1806:27 {"url":"http://127.0.0.1:8000/dashboard-saya","user_agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36 Edg/149.0.0.0","timestamp":"2026-06-26T05:36:16.190Z"} 
+[2026-06-26 05:36:32] local.ERROR: Unhandled Promise Rejection SyntaxError Invalid or unexpected token SyntaxError: Invalid or unexpected token
+    at Array.<anonymous> (http://127.0.0.1:8000/livewire-f6f6ff74/livewire.js?id=6b3709b1:6032:9)
+    at trigger2 (http://127.0.0.1:8000/livewire-f6f6ff74/livewire.js?id=6b3709b1:4342:34)
+    at Component.processEffects (http://127.0.0.1:8000/livewire-f6f6ff74/livewire.js?id=6b3709b1:6405:7)
+    at new Component (http://127.0.0.1:8000/livewire-f6f6ff74/livewire.js?id=6b3709b1:6346:12)
+    at initComponent (http://127.0.0.1:8000/livewire-f6f6ff74/livewire.js?id=6b3709b1:6672:21)
+    at http://127.0.0.1:8000/livewire-f6f6ff74/livewire.js?id=6b3709b1:13883:30
+    at http://127.0.0.1:8000/livewire-f6f6ff74/livewire.js?id=6b3709b1:2232:58
+    at http://127.0.0.1:8000/livewire-f6f6ff74/livewire.js?id=6b3709b1:1806:42
+    at Array.forEach (<anonymous>)
+    at http://127.0.0.1:8000/livewire-f6f6ff74/livewire.js?id=6b3709b1:1806:27 {"url":"http://127.0.0.1:8000/dashboard-saya","user_agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36 Edg/149.0.0.0","timestamp":"2026-06-26T05:36:31.957Z"} 
+[2026-06-26 05:39:01] local.ERROR: Unhandled Promise Rejection SyntaxError Invalid or unexpected token SyntaxError: Invalid or unexpected token {"url":"http://127.0.0.1:8000/dashboard-saya","user_agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36 Edg/149.0.0.0","timestamp":"2026-06-26T05:39:01.227Z"} 
+[2026-06-26 05:43:41] local.ERROR: Unhandled Promise Rejection SyntaxError Invalid or unexpected token SyntaxError: Invalid or unexpected token {"url":"http://127.0.0.1:8000/dashboard-saya","user_agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36 Edg/149.0.0.0","timestamp":"2026-06-26T05:43:40.456Z"} 
+[2026-06-26 05:47:15] local.ERROR: Unhandled Promise Rejection SyntaxError Invalid or unexpected token SyntaxError: Invalid or unexpected token {"url":"http://127.0.0.1:8000/dashboard-saya","user_agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36 Edg/149.0.0.0","timestamp":"2026-06-26T05:47:13.508Z"} 
+[2026-06-26 05:49:15] local.ERROR: Unhandled Promise Rejection SyntaxError Invalid or unexpected token SyntaxError: Invalid or unexpected token {"url":"http://127.0.0.1:8000/dashboard-saya","user_agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36 Edg/149.0.0.0","timestamp":"2026-06-26T05:49:15.210Z"} 
+[2026-06-26 05:51:52] local.ERROR: Unhandled Promise Rejection SyntaxError Invalid or unexpected token SyntaxError: Invalid or unexpected token {"url":"http://127.0.0.1:8000/dashboard-saya","user_agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36 Edg/149.0.0.0","timestamp":"2026-06-26T05:51:52.171Z"} 
+[2026-06-26 05:55:12] local.ERROR: Unhandled Promise Rejection SyntaxError Invalid or unexpected token SyntaxError: Invalid or unexpected token {"url":"http://127.0.0.1:8000/dashboard-saya","user_agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36 Edg/149.0.0.0","timestamp":"2026-06-26T05:55:11.784Z"} 
+[2026-06-26 05:59:59] local.ERROR: Unhandled Promise Rejection SyntaxError Invalid or unexpected token SyntaxError: Invalid or unexpected token {"url":"http://127.0.0.1:8000/dashboard-saya","user_agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36 Edg/149.0.0.0","timestamp":"2026-06-26T05:59:58.693Z"} 
+[2026-06-26 06:02:22] local.ERROR: Unhandled Promise Rejection SyntaxError Invalid or unexpected token SyntaxError: Invalid or unexpected token {"url":"http://127.0.0.1:8000/dashboard-saya","user_agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36 Edg/149.0.0.0","timestamp":"2026-06-26T06:02:22.163Z"} 
+[2026-06-26 06:03:09] local.ERROR: Unhandled Promise Rejection SyntaxError Invalid or unexpected token SyntaxError: Invalid or unexpected token
+    at Array.<anonymous> (http://127.0.0.1:8000/livewire-f6f6ff74/livewire.js?id=6b3709b1:6032:9)
+    at trigger2 (http://127.0.0.1:8000/livewire-f6f6ff74/livewire.js?id=6b3709b1:4342:34)
+    at Component.processEffects (http://127.0.0.1:8000/livewire-f6f6ff74/livewire.js?id=6b3709b1:6405:7)
+    at new Component (http://127.0.0.1:8000/livewire-f6f6ff74/livewire.js?id=6b3709b1:6346:12)
+    at initComponent (http://127.0.0.1:8000/livewire-f6f6ff74/livewire.js?id=6b3709b1:6672:21)
+    at http://127.0.0.1:8000/livewire-f6f6ff74/livewire.js?id=6b3709b1:13883:30
+    at http://127.0.0.1:8000/livewire-f6f6ff74/livewire.js?id=6b3709b1:2232:58
+    at http://127.0.0.1:8000/livewire-f6f6ff74/livewire.js?id=6b3709b1:1806:42
+    at Array.forEach (<anonymous>)
+    at http://127.0.0.1:8000/livewire-f6f6ff74/livewire.js?id=6b3709b1:1806:27 {"url":"http://127.0.0.1:8000/dashboard-saya","user_agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36 Edg/149.0.0.0","timestamp":"2026-06-26T06:03:09.076Z"} 
+[2026-06-26 06:03:50] local.WARNING: Livewire: [wire:model="perPage"] property does not exist on component: [pages::admin.nasabah.index]  {"url":"http://127.0.0.1:8000/admin/nasabah","user_agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36 Edg/149.0.0.0","timestamp":"2026-06-26T06:03:50.019Z"} 
+[2026-06-26 06:03:50] local.WARNING: Livewire: [wire:model="perPage"] property does not exist on component: [pages::admin.nasabah.index]     {"url":"http://127.0.0.1:8000/admin/nasabah","user_agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36 Edg/149.0.0.0","timestamp":"2026-06-26T06:03:50.019Z"} 
+[2026-06-26 06:05:14] local.ERROR: Uncaught TypeError: Cannot read properties of undefined (reading 'getContext') http://127.0.0.1:8000/admin/nasabah 16 67 TypeError Cannot read properties of undefined (reading 'getContext') TypeError: Cannot read properties of undefined (reading 'getContext')
+    at Proxy.renderChart (eval at safeAsyncFunction (http://127.0.0.1:8000/livewire-f6f6ff74/livewire.js?id=6b3709b1:1453:21), <anonymous>:16:67)
+    at eval (eval at safeAsyncFunction (http://127.0.0.1:8000/livewire-f6f6ff74/livewire.js?id=6b3709b1:1453:21), <anonymous>:6:77) {"url":"http://127.0.0.1:8000/admin/nasabah","user_agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36 Edg/149.0.0.0","timestamp":"2026-06-26T06:05:14.003Z"} 
+[2026-06-26 06:05:14] local.ERROR: Uncaught TypeError: Cannot read properties of undefined (reading 'getContext') http://127.0.0.1:8000/admin/nasabah 16 67 TypeError Cannot read properties of undefined (reading 'getContext') TypeError: Cannot read properties of undefined (reading 'getContext')
+    at Proxy.renderChart (eval at safeAsyncFunction (http://127.0.0.1:8000/livewire-f6f6ff74/livewire.js?id=6b3709b1:1453:21), <anonymous>:16:67)
+    at eval (eval at safeAsyncFunction (http://127.0.0.1:8000/livewire-f6f6ff74/livewire.js?id=6b3709b1:1453:21), <anonymous>:6:77) {"url":"http://127.0.0.1:8000/admin/nasabah","user_agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36 Edg/149.0.0.0","timestamp":"2026-06-26T06:05:14.003Z"} 
+[2026-06-26 06:05:17] local.ERROR: Uncaught TypeError: Cannot read properties of undefined (reading 'getContext') http://127.0.0.1:8000/admin/nasabah 16 67 TypeError Cannot read properties of undefined (reading 'getContext') TypeError: Cannot read properties of undefined (reading 'getContext')
+    at Proxy.renderChart (eval at safeAsyncFunction (http://127.0.0.1:8000/livewire-f6f6ff74/livewire.js?id=6b3709b1:1453:21), <anonymous>:16:67)
+    at eval (eval at safeAsyncFunction (http://127.0.0.1:8000/livewire-f6f6ff74/livewire.js?id=6b3709b1:1453:21), <anonymous>:6:77) {"url":"http://127.0.0.1:8000/admin/nasabah","user_agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36 Edg/149.0.0.0","timestamp":"2026-06-26T06:05:16.599Z"} 
+[2026-06-26 06:05:17] local.ERROR: Uncaught TypeError: Cannot read properties of undefined (reading 'getContext') http://127.0.0.1:8000/admin/nasabah 16 67 TypeError Cannot read properties of undefined (reading 'getContext') TypeError: Cannot read properties of undefined (reading 'getContext')
+    at Proxy.renderChart (eval at safeAsyncFunction (http://127.0.0.1:8000/livewire-f6f6ff74/livewire.js?id=6b3709b1:1453:21), <anonymous>:16:67)
+    at eval (eval at safeAsyncFunction (http://127.0.0.1:8000/livewire-f6f6ff74/livewire.js?id=6b3709b1:1453:21), <anonymous>:6:77) {"url":"http://127.0.0.1:8000/admin/nasabah","user_agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36 Edg/149.0.0.0","timestamp":"2026-06-26T06:05:16.599Z"} 

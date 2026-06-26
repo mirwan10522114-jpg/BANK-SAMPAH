@@ -1,0 +1,3 @@
+<svg class="inline flex-shrink-0 w-5 h-5 size-6 text-warning" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true" data-slot="icon">
+  <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/>
+</svg><?php /**PATH C:\laragon\www\BANK-SAMPAH\storage\framework\views/685ac0a9f7e97d52c023fe38855c9152.blade.php ENDPATH**/ ?>
